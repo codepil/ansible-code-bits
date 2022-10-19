@@ -1,0 +1,40 @@
+---
+# https://github.com/PowerShell/xWinEventLog
+# https://docs.ansible.com/ansible/latest/user_guide/windows_dsc.html
+# https://docs.ansible.com/ansible/latest/modules/win_eventlog_module.html
+
+- name: Application Event Log
+  win_eventlog:
+    name: 'Application'
+    overflow_action: OverwriteAsNeeded
+    maximum_size: "{{ application_evt_log_size_bytes }}"
+    state: present
+  tags:
+    - eventlog
+
+- name: Security Event Log
+  win_eventlog:
+    name: 'Security'
+    overflow_action: OverwriteAsNeeded
+    maximum_size: "{{ security_evt_log_size_bytes }}"
+    state: present
+  tags:
+    - eventlog
+
+- name: System Event Log
+  win_eventlog:
+    name: 'System'
+    overflow_action: OverwriteAsNeeded
+    maximum_size: "{{ system_evt_log_size_bytes }}"
+    state: present
+  tags:
+    - eventlog
+
+# - name: Setup Event Log
+#   win_eventlog:
+#     name: 'Setup'
+#     overflow_action: OverwriteAsNeeded
+#     maximum_size: "{{ setup_evt_log_size_bytes }}"
+#     state: present
+#   tags:
+#     - eventlog

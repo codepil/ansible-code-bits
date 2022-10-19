@@ -1,0 +1,15 @@
+---
+- hosts: all
+  vars:
+
+  roles:
+    #  Harden the packer created image sourced
+    #  from Google base image of Ubuntu 20.04 lts
+    - role: ubuntu_hardening
+      become: true
+
+    # Install Google logging agent to the packer hardened image.
+    - role: google-cloud-ops-agents-ansible
+      become: true
+      vars:
+        agent_type: logging

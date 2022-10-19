@@ -1,0 +1,38 @@
+---
+# NIC properties
+# Tags: shell, network
+- name: Check Small RX Buffers value
+  win_shell: if((Get-NetAdapterAdvancedProperty -DisplayName "Small RX Buffers").RegistryValue -eq {{win_hardening_nic_smallrxbuffers}}){'true'}else{'false'}
+  args:
+    executable: powershell
+  register: rxSmallBuffers_check
+  tags:
+    - shell
+    - network
+
+- name: Set Small RX Buffers
+  win_shell: Set-NetAdapterAdvancedProperty -DisplayName "Small RX Buffers" -RegistryValue {{win_hardening_nic_smallrxbuffers}}
+  when:
+    - rxSmallBuffers_check is defined
+    - rxSmallBuffers_check['stdout_lines'][0] == 'false'
+  tags:
+    - shell
+    - network
+
+- name: Check Rx Ring 1 Size
+  win_shell: if((Get-NetAdapterAdvancedProperty -DisplayName "Rx Ring #1 Size").RegistryValue -eq {{win_hardening_nic_rxring1size}}){'true'}else{'false'}
+  args:
+    executable: powershell
+  register: rxRing1Size_check
+  tags:
+    - shell
+    - network
+
+- name: Set Rx Ring 1 Size
+  win_shell: Set-NetAdapterAdvancedProperty -DisplayName "Rx Ring #1 Size" -RegistryValue {{win_hardening_nic_rxring1size}}
+  when:
+    - rxRing1Size_check is defined
+    - rxRing1Size_check['stdout_lines'][0] == 'false'
+  tags:
+    - shell
+    - network

@@ -1,0 +1,271 @@
+properties([
+    parameters([
+        // choice(
+        //     name: 'SDLC_CATEGORY',
+        //     choices: [
+        //         'devqa',
+        //         // 'noncde',
+        //         // 'cde',
+        //         // 'ops'
+        //     ],
+        //     description: 'Maps to the target sdlc boundary of this manifest.'
+        // ),
+        string(
+            name: 'PACKER_REPO_REF',
+            defaultValue:  'master',
+            description: 'Which branch to reference.'
+        ),
+        string(
+            name: 'WHICH_IMAGE_FAMILIES_TO_BUILD',
+            defaultValue: 'all',
+            description: 'Specify a comma separated list of image families (prepended with googelcompute) to build. EXAMPLE: "windows-2016.*,rhel-8.*". If they are in the associated Packer configuration, they will be built. Leave as "all" to build all images'
+        ),
+        booleanParam(
+            name: 'SKIP_CREATE_IMAGE',
+            defaultValue: true,
+            description: 'If true, pipeline will only validate Packer config. If false, the images will actually go through creation.'
+        ),
+        booleanParam(
+            name: 'AUTO_APPROVE',
+            defaultValue: false,
+            description: 'If true, pipeline will not halt for user approval after terraform plan'
+        )
+    ])
+])
+
+
+/*
+    Since this pipeline isn't meant to be dynamic and should only live in one place, the following are static values that shouldn't change between runs.
+*/
+def unitCode            = "ssvc"
+def gcpProjectId        = "pid-gcp-ssvc-os-images"
+def packerRepo          = "https://github.com/codepil/ansible-code-bits/golden-vm-image-configuration.git"
+def gitCreds            = "gitlab-sa-token"
+def packerRunSvcAcc     = "${gcpProjectId}-i@${gcpProjectId}.iam.gserviceaccount.com"
+def packerVersion       = "1.7.2"
+def jenkinsCloud        = "kubernetes"
+def vmSubnet            = "subnet-for-packer-vms"
+
+def lifecycle           = "cde" // "${params.SDLC_CATEGORY}"
+def jenkinsNamespace    = "lz-bu-${unitCode}"
+def jenkinsSvcAcct      = "${gcpProjectId}"
+def packerRepoRef       = "${params.PACKER_REPO_REF}"
+def autoApprove         = params.AUTO_APPROVE
+def skipCreateImage     = params.SKIP_CREATE_IMAGE
+def keyId               = ""
+def imagesToBuild       = "${params.WHICH_IMAGE_FAMILIES_TO_BUILD}".trim()
+
+pipeline {
+    agent {
+        kubernetes {
+            cloud "${jenkinsCloud}"
+            label "${env.BUILD_TAG}"
+            defaultContainer 'jnlp'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: ${jenkinsNamespace}
+  labels:
+    component: ci
+spec:
+  # Use service account that can deploy to all namespaces
+  serviceAccountName: ${jenkinsSvcAcct}
+  containers:
+  - name: packer
+    #image: hashicorp/packer:${packerVersion}
+    image: gcr.io/pid-gcp-lzds-res01/packer_image_builder:0.0.3
+    command:
+    - cat
+    tty: true
+  - name: gcloud
+    image: google/cloud-sdk:315.0.0
+    command:
+    - cat
+    tty: true
+  - name: jq
+    image: stedolan/jq:latest
+    command:
+    - cat
+    tty: true
+"""
+        }
+    }
+    stages {
+        stage('Prepare Packer Repo') {
+            steps {
+                container('packer') {
+                    dir('module-repo') {
+                        git url: packerRepo, credentialsId: gitCreds, branch: packerRepoRef
+                    }
+                }
+            }
+        }
+
+        stage('Setup') {
+            steps {
+                container('gcloud') {
+                    script {
+                        dir('module-repo') {
+                            sh """
+                                gcloud iam service-accounts keys create key.json --iam-account="${packerRunSvcAcc}"
+                            """
+                        }
+                    }
+                }
+                container('jq') {
+                    script {
+                        keyId = sh(script: """cat ./module-repo/key.json | jq -r '.private_key_id'""", returnStdout: true).trim()
+                    }
+                }
+            }
+        }
+
+        stage('Packer - Init') {
+            steps {
+                container('packer') {
+                    dir('module-repo') {
+                        script {
+                            try {
+                                echo 'Running packer init...'
+                                sh """
+                                    packer init .
+                                """
+                            }
+                            catch (exc) {
+                                error('Packer init failed!')
+                                currentBuild.result = 'FAILURE'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Packer - Validate') {
+            steps {
+                container('packer') {
+                    dir('module-repo') {
+                        script {
+                            try {
+                                echo 'Running packer validation...'
+                                if ("${imagesToBuild}" == "all" || "${imagesToBuild}" == "") {
+                                    echo 'Running packer validation...'
+                                    sh """
+                                        packer validate \
+                                        -var 'project_id=${gcpProjectId}' \
+                                        -var 'environment=${lifecycle}' \
+                                        -var 'commit_sha=${env.GIT_COMMIT}' \
+                                        -var 'skip_create_image=${skipCreateImage}' \
+                                        -var 'vm_subnet=${vmSubnet}' \
+                                        -var 'gcp_creds=key.json' \
+                                        .
+                                    """
+                                } else {
+                                    sh """
+                                        packer validate \
+                                        -var 'project_id=${gcpProjectId}' \
+                                        -var 'environment=${lifecycle}' \
+                                        -var 'commit_sha=${env.GIT_COMMIT}' \
+                                        -var 'skip_create_image=${skipCreateImage}' \
+                                        -var 'vm_subnet=${vmSubnet}' \
+                                        -var 'gcp_creds=key.json' \
+                                        -only='${imagesToBuild}' \
+                                        .
+                                    """ 
+                                }
+                            }
+                            catch (exc) {
+                                error('Packer validation failed!')
+                                currentBuild.result = 'FAILURE'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Packer - Build Confirmation') {
+            when {
+                not { expression { return autoApprove } }
+            }
+            steps {
+                script {
+                    timeout(time: 1, unit: 'HOURS') {
+                        input(id: 'confirm', message: 'Approve Packer Build?')
+                    }
+                }
+            }
+        }
+
+        stage('Packer - Build') {
+            steps {
+                container('packer') {
+                    dir('module-repo') {
+                        script {
+                            if ("${imagesToBuild}" == "all" || "${imagesToBuild}" == "") {
+                                sh """
+                                    packer build \
+                                    -force \
+                                    -color=false \
+                                    -timestamp-ui \
+                                    -var 'project_id=${gcpProjectId}' \
+                                    -var 'environment=${lifecycle}' \
+                                    -var 'commit_sha=${env.GIT_COMMIT}' \
+                                    -var 'skip_create_image=${skipCreateImage}' \
+                                    -var 'vm_subnet=${vmSubnet}' \
+                                    -var 'gcp_creds=key.json' \
+                                    .
+                                """
+                            } else {
+                                sh """
+                                    packer build \
+                                    -force \
+                                    -color=false \
+                                    -timestamp-ui \
+                                    -var 'project_id=${gcpProjectId}' \
+                                    -var 'environment=${lifecycle}' \
+                                    -var 'commit_sha=${env.GIT_COMMIT}' \
+                                    -var 'skip_create_image=${skipCreateImage}' \
+                                    -var 'vm_subnet=${vmSubnet}' \
+                                    -var 'gcp_creds=key.json' \
+                                    -only '${imagesToBuild}' \
+                                    .
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deprecate and Delete out-of-date images') {
+            steps {
+                container('gcloud') {
+                    script {
+                        echo 'Setting deprecation/obsoletion attributes.'
+                        sh """
+                        chmod +x ./utils/vmImageUtils.sh
+                        ./utils/vmImageUtils.sh ${gcpProjectId}
+                        """
+
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Cleaning up!'
+            container('gcloud') {
+                sh """
+                    gcloud iam service-accounts keys delete ${keyId} --iam-account=${packerRunSvcAcc} -q
+                """
+            }
+
+            dir('module-repo') {
+                sh "rm key.json"
+            }
+        }
+    }
+}

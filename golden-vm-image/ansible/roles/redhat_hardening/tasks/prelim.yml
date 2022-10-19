@@ -1,0 +1,303 @@
+---
+# Preliminary tasks that should always be run
+
+# Unremark below if you need to debug and see all ansible OS facts.
+# - name: Print all available ansible facts of the Google image being hardened
+#   ansible.builtin.debug:
+#     var: ansible_facts
+
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+# Unremark below if you need to debug and see all OS packages ansible finds.
+# - name: Print the package facts
+#   ansible.builtin.debug:
+#     var: ansible_facts.packages
+
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+# Unremark below if you need to debug and see all OS services ansible finds.
+# - name: Print service facts
+#   ansible.builtin.debug:
+#     var: ansible_facts.services
+
+- name: "Ensure gpgcheck is globally activated"
+  block:
+    - name: Check existence of yum
+      stat:
+        path: /etc/yum.conf
+      register: yum_config_file
+      check_mode: false
+      when:
+        - '"yum" in ansible_facts.packages'
+
+    - name: Ensure GPG check is globally activated (yum)
+      ini_file:
+        dest: /etc/yum.conf
+        section: main
+        option: gpgcheck
+        value: 1
+        no_extra_spaces: true
+        create: false
+
+    - name: Ensure GPG check is globally activated (dnf)
+      ini_file:
+        dest: /etc/dnf/dnf.conf
+        section: main
+        option: gpgcheck
+        value: 1
+        no_extra_spaces: true
+        create: false
+      when:
+        - 'ansible_distribution_major_version == "8"'
+
+    - name: Grep for yum repo section names
+      shell: |
+        set -o pipefail
+        grep -HEr '^\[.+\]' -r /etc/yum.repos.d/
+      register: repo_grep_results
+      ignore_errors: true
+      changed_when: false
+
+    - name: Set gpgcheck=1 for each yum repo
+      ini_file:
+        path: '{{ item[0] }}'
+        section: '{{ item[1] }}'
+        option: gpgcheck
+        value: '1'
+        no_extra_spaces: true
+        mode: u-x,go-xw
+        owner: root
+      loop: '{{ repo_grep_results.stdout | regex_findall( ''(.+\.repo):\[(.+)\]\n?'' )  }}'
+  when:
+    - gpgcheck_is_globally_activated
+
+- name: "Ensure GPG keys are configured."
+  block:
+    - name: Read permission of GPG key directory
+      stat:
+        path: /etc/pki/rpm-gpg/
+      register: gpg_key_directory_permission
+      check_mode: false
+
+    - name: Read signatures in GPG key
+      command: gpg --show-keys --with-fingerprint --with-colons "/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
+      args:
+        warn: false
+      changed_when: false
+      register: gpg_fingerprints
+      check_mode: false
+
+    - name: Set Fact - Installed GPG Fingerprints
+      set_fact:
+        gpg_installed_fingerprints: |-
+          {{ gpg_fingerprints.stdout | regex_findall('^pub.*
+          (?:^fpr[:]*)([0-9A-Fa-f]*)', '\1') | list }}
+
+    - name: Set Fact - Valid fingerprints
+      set_fact:
+        gpg_valid_fingerprints: ("567E347AD0044ADE55BA8A5F199E2F91FD431D51" "6A6AA7C97C8890AEC6AEBFE2F76F66C3D4082792")
+
+    - name: Import RedHat GPG key
+      rpm_key:
+        state: present
+        key: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+      when:
+        - gpg_key_directory_permission.stat.mode <= '0755'
+        - (gpg_installed_fingerprints | difference(gpg_valid_fingerprints)) | length == 0
+        - gpg_installed_fingerprints | length > 0
+        - ansible_distribution == "RedHat"
+  when: gpg_keys_are_configured
+
+- name: Install yum utils
+  package:
+    name:
+      - yum-utils
+      - "@Development tools"
+
+- name: install python core utils
+  become: true
+  package:
+    name: python3-policycoreutils
+    state: present
+    update_cache: true
+  when:
+    - 'ansible_distribution_major_version == "8"'
+
+- name: install python selinux library required by future ansible modules
+  become: true
+  package:
+    name: libselinux-python3
+    state: present
+    update_cache: true
+
+- name: "Ensure updates, patches, and additional security software are installed"
+  package:
+    name: '*'
+    state: latest
+  when:
+    - updates_patches_and_additional_security_software_are_installed
+
+- name: "Reboot the GCP Instance being hardened"
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 5
+    post_reboot_delay: 50
+    test_command: uptime
+
+- name: "PRELIM Configure System Accounting (auditd)"
+  package:
+    name: "{{ auditd_package[ansible_os_family] }}"
+    state: present
+
+- name: "PRELIM | List users accounts"
+  command: "awk -F: '{print $1}' /etc/passwd"
+  register: users
+  changed_when: false
+  check_mode: false
+
+- name: "PRELIM | Gather homes with wrong permissions on /home"
+  shell: 'set -o pipefail;
+      for dir in $(getent passwd | cut -d '':'' -f 6 | awk ''$1 ~ /^\/home\//'');
+      do
+        perm=$(stat -L -c "%A" "$dir" );
+        if [ -d $dir ] && ([ "${perm:7:3}" != "---" ] || [ "${perm:5:1}" == "w" ] );
+        then
+          echo -n "$dir ";
+        fi;
+      done'
+  args:
+    executable: /bin/bash
+  register: homes_with_perms
+  changed_when: false
+  check_mode: false
+
+- name: "PRELIM | Gather accounts with empty password fields"
+  shell: "set -o pipefail;
+    cat /etc/shadow | awk -F: '($2 == \"\" ) {j++;print $1; } END {exit j}'"
+  args:
+    executable: /bin/bash
+  register: empty_password_accounts
+  changed_when: false
+  check_mode: false
+
+- name: "PRELIM | Check if root has password"
+  shell: 'set -o pipefail;
+       getent shadow | grep root | awk -F: ''($2 == "*" || $2 == "!" ) { printf $2; }'''
+  args:
+    executable: /bin/bash
+  register: current_root_password
+  changed_when: false
+  check_mode: false
+
+- name: "PRELIM | Gather UID 0 accounts other than root"
+  shell: "set -o pipefail;
+    cat /etc/passwd | awk -F: '($3 == 0 && $1 != \"root\") {i++;print $1 } END {exit i}'"
+  args:
+    executable: /bin/bash
+  register: uid_zero_accounts_except_root
+  changed_when: false
+  check_mode: false
+
+- name: "PRELIM Configure cron"
+  package:
+    name: "{{ cron_package[ansible_os_family] }}"
+    state: present
+
+- name: "PRELIM | Check if prelink package is installed"
+  command: "{{ prelim_check_package_command[ansible_os_family] }} prelink"
+  register: prelink_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: "PRELIM | Check if postfix package is installed"
+  command: "{{ prelim_check_package_command[ansible_os_family] }} postfix"
+  register: postfix_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: "PRELIM | Check for ntpd service"
+  shell: "set -o pipefail;
+    systemctl show {{ ntp_service[ansible_os_family] }} | grep LoadState | cut -d = -f 2"
+  args:
+    executable: /bin/bash
+  register: ntpd_service_status
+  changed_when: false
+  check_mode: false
+
+- name: "PRELIM | Check for chronyd service"
+  shell: "set -o pipefail;
+    systemctl show {{ chrony_service[ansible_os_family] }} | grep LoadState | cut -d = -f 2"
+  args:
+    executable: /bin/bash
+  register: chronyd_service_status
+  changed_when: false
+  check_mode: false
+
+- name: "PRELIM | Check for ypserv service"
+  shell: "set -o pipefail;
+    systemctl show nis | grep LoadState | cut -d = -f 2"
+  args:
+    executable: /bin/bash
+  register: ypserv_service_status
+  changed_when: false
+  check_mode: false
+
+- name: "PRELIM | Check for autofs service"
+  shell: "set -o pipefail;
+    systemctl show autofs | grep LoadState | cut -d = -f 2"
+  args:
+    executable: /bin/bash
+  register: autofs_service_status
+  changed_when: false
+  check_mode: false
+
+- name: "PRELIM | Check that users last password change date are in the future"
+  shell: |
+      set -o pipefail;
+      awk -F: '{print $1}' /etc/shadow | while read -r usr
+      do
+        if [[ $(date --date="$(chage --list "$usr" | grep '^Last password change' | cut -d: -f2)" +%s) > $(date +%s) ]];then
+          echo "$usr"
+        fi
+      done
+  args:
+    executable: /bin/bash
+  register: users_password_change_date_in_future
+  changed_when: false
+  check_mode: false
+
+- name: "Parse /etc/passwd"
+  block:
+    - name: "PRELIM | {{ rhelcis_passwd_tasks }} | Parse /etc/passwd"
+      command: cat /etc/passwd
+      changed_when: false
+      check_mode: false
+      register: rhelcis_passwd_file_audit
+
+    - name: "PRELIM | 5.5.2 | 6.2.7 | 6.2.8 6.2.20 | Split passwd entries"
+      set_fact:
+        rhelcis_passwd: "{{ rhelcis_passwd_file_audit.stdout_lines | map('regex_replace', ld_passwd_regex, ld_passwd_yaml) | map('from_yaml') | list }}"
+      with_items: "{{ rhelcis_passwd_file_audit.stdout_lines }}"
+      vars:
+        ld_passwd_regex: >-
+            ^(?P<id>[^:]*):(?P<password>[^:]*):(?P<uid>[^:]*):(?P<gid>[^:]*):(?P<gecos>[^:]*):(?P<dir>[^:]*):(?P<shell>[^:]*)
+        ld_passwd_yaml: |
+            id: >-4
+                \g<id>
+            password: >-4
+                \g<password>
+            uid: \g<uid>
+            gid: \g<gid>
+            gecos: >-4
+                \g<gecos>
+            dir: >-4
+                \g<dir>
+            shell: >-4
+                \g<shell>

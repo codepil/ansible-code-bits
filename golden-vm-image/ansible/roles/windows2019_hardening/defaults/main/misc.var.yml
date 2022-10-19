@@ -1,0 +1,183 @@
+# yamllint disable rule:line-length
+---
+## 2.3.2.1 - Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings
+ ## Values 'Enabled'||'Disabled'
+audit_force_audit_policy_subcategory_settings_windows_vista_or_later_to_override_audit_policy_category_settings: 1
+## 2.3.2.2 - Audit: Shut down system immediately if unable to log security audits
+  ## Values 'Enabled'||'Disabled'
+audit_shut_down_system_immediately_if_unable_to_log_security_audits: 0
+## 2.3.4.1 - Devices: Allowed to format and eject removable media
+devices_allowed_to_format_and_eject_removable_media: 0
+## 2.3.4.2 - Devices: Prevent users from installing printer drivers
+## Values 'Enabled'||'Disabled'
+devices_prevent_users_from_installing_printer_drivers: 1
+## 2.3.6.1 - Domain member: Digitally encrypt or sign secure channel data (always)
+ ## Values 'Enabled'||'Disabled'
+domain_member_digitally_encrypt_or_sign_secure_channel_data_always: 1
+## 2.3.6.2 - Domain member: Digitally encrypt secure channel data (when possible)
+  ## Values 'Enabled'||'Disabled'
+domain_member_digitally_encrypt_secure_channel_data_when_possible: 1
+## 2.3.6.3 - Domain member: Digitally sign secure channel data (when possible)
+## Values 'Enabled'||'Disabled'
+domain_member_digitally_sign_secure_channel_data_when_possible: 1
+## 2.3.6.4 - Domain member: Disable machine account password changes
+  ## Values 'Enabled'||'Disabled'
+domain_member_disable_machine_account_password_changes: 0
+## 2.3.6.5 - Domain member: Maximum machine account password age
+  ## Value in days
+domain_member_maximum_machine_account_password_age: 30
+## 2.3.6.6 - Domain member: Require strong (Windows 2000 or later) session key
+  ## Values 'Enabled'||'Disabled'
+domain_member_require_strong_windows_2000_or_later_session_key: 1
+## 2.3.7.1 - Interactive logon: Do not display last user name
+  ## Values 'Enabled'||'Disabled'
+interactive_logon_do_not_display_last_user_name: 1
+## 2.3.7.2 - Interactive logon: Do not require CTRL+ALT+DEL
+  ## Values 'Enabled'||'Disabled'
+interactive_logon_do_not_require_ctrl_alt_del: 0
+## 2.3.7.3 - Interactive logon: Machine inactivity limit
+  ## Value in minutes
+interactive_logon_machine_inactivity_limit: 900
+## 2.3.7.4 - Interactive logon: Message text for users attempting to log on
+interactive_logon_message_text_for_users_attempting_to_log_on: 'Warning: This system is restricted to authorized users of your company. and should be utilized for business purposes only. Unauthorized access or use is a violation of company policy and the law. This system may be monitored for administrative and security reasons. By proceeding, you acknowledge that (1) you have read and understand this notice, and (2) you consent to the system monitoring.'
+## 2.3.7.5 - Interactive logon: Message title for users attempting to log on
+interactive_logon_message_title_for_users_attempting_to_log_on: 'Security Disclosure'
+## 2.3.7.6 - Interactive logon: Number of previous logons to cache (in case domain controller is not available)
+interactive_logon_number_of_previous_logons_to_cache_in_case_domain_controller_is_not_available: 0
+## 2.3.7.7 - Interactive logon: Prompt user to change password before expiration
+  ## Value in days
+interactive_logon_prompt_user_to_change_password_before_expiration: 5
+## 2.3.7.8 - Interactive logon: Require Domain Controller authentication to unlock workstation
+  ## Values 'Enabled'||'Disabled'
+interactive_logon_require_domain_controller_authentication_to_unlock_workstation: {
+  'secureexchange.net': 1,
+  'gpi.cloud': 1,
+  'gcp_image': 0
+}
+## 2.3.7.9 - Interactive logon: Smart card removal behavior
+  ## Values 'Enabled'||'Disabled'
+interactive_logon_require_smart_card: 1
+## 2.3.8.1 - Microsoft network client: Digitally sign communications (always)
+  ## Values 'Enabled'||'Disabled'
+microsoft_network_client_digitally_sign_communications_always: 1
+## 2.3.8.2 - Microsoft network client: Digitally sign communications (if server agrees)
+  ## Values 'Enabled'||'Disabled'
+microsoft_network_client_digitally_sign_communications_if_server_agrees: 1
+## 2.3.8.3 - Microsoft network client: Send unencrypted password to third-party SMB servers
+  ## Values 'Enabled'||'Disabled'
+microsoft_network_client_send_unencrypted_password_to_third_party_smb_servers: 0
+## 2.3.9.1 - Microsoft network server: Amount of idle time required before suspending session
+  ## Value in minutes
+microsoft_network_server_amount_of_idle_time_required_before_suspending_session: 15
+## 2.3.9.2 - Microsoft network server: Digitally sign communications (always)
+  ## Values 'Enabled'||'Disabled'
+microsoft_network_server_digitally_sign_communications_always: 1
+## 2.3.9.3 - Microsoft network server: Digitally sign communications (if client agrees)
+  ## Values 'Enabled'||'Disabled'
+microsoft_network_server_digitally_sign_communications_if_client_agrees: 1
+## 2.3.9.4 - Microsoft network server: Disconnect clients when logon hours expire
+  ## Values 'Enabled'||'Disabled'
+microsoft_network_server_disconnect_clients_when_logon_hours_expire: 1
+## 2.3.9.5 - Microsoft network server: Server SPN target name validation level
+  ## 1 (Accept if provided by the client) || 2 (Required from client)
+microsoft_network_server_server_spn_target_name_validation_level: 1
+## 2.3.10.1 - Network access: Allow anonymous SID/Name translation
+  ## Values 'Enabled'||'Disabled'
+network_access_allow_anonymous_sid_name_translation: 0
+## 2.3.10.2 - Network access: Do not allow anonymous enumeration of SAM accounts
+  ## Values 'Enabled'||'Disabled'
+network_access_do_not_allow_anonymous_enumeration_of_sam_accounts: 1
+## 2.3.10.2 - Network access: Do not allow anonymous enumeration of SAM accounts and shares
+  ## Values 'Enabled'||'Disabled'
+network_access_do_not_allow_anonymous_enumeration_of_sam_accounts_and_shares: 1
+## 2.3.10.5 - Network access: Let Everyone permissions apply to anonymous users
+  ## Values 'Enabled'||'Disabled'
+network_access_let_everyone_permissions_apply_to_anonymous_users: 0
+## 2.3.10.6 - Network Access: Named Pipes that can be accessed anonymously
+  ## Identities separated by commas
+network_access_named_pipes_that_can_be_accessed_anonymously: []
+## 2.3.10.7 - Network access: Remotely accessible registry paths
+  ## Identities separated by commas
+network_access_remotely_accessible_registry_paths: 'System\CurrentControlSet\Control\ProductOptions,System\CurrentControlSet\Control\Server Applications,Software\Microsoft\Windows NT\CurrentVersion'
+## 2.3.10.8 - Network access: Remotely accessible registry paths and subpaths
+  ## Identities separated by commas
+network_access_remotely_accessible_registry_paths_and_subpaths: 'System\CurrentControlSet\Control\Print\Printers,System\CurrentControlSet\Services\Eventlog,Software\Microsoft\OLAP Server,Software\Microsoft\Windows NT\CurrentVersion\Print,Software\Microsoft\Windows NT\CurrentVersion\Windows,System\CurrentControlSet\Control\ContentIndex,System\CurrentControlSet\Control\Terminal Server,System\CurrentControlSet\Control\Terminal Server\UserConfig,System\CurrentControlSet\Control\Terminal Server\DefaultUserConfiguration,Software\Microsoft\Windows NT\CurrentVersion\Perflib,System\CurrentControlSet\Services\SysmonLog'
+## 2.3.10.9 - Network access: Restrict anonymous access to Named Pipes and Shares
+  ## Values 'Enabled'||'Disabled'
+network_access_restrict_anonymous_access_to_named_pipes_and_shares: 1
+## 2.3.10.11 - Network access: Shares that can be accessed anonymously
+  ## Identities separated by commas
+network_access_shares_that_can_be_accessed_anonymously: []
+## 2.3.10.12 - Network access: Sharing and security model for local accounts
+  ## Values: 'Classic - Local users authenticate as themselves' || Guest only - Local users authenticate as Guest'
+network_access_sharing_and_security_model_for_local_accounts: 0
+## 2.3.11.1 - Network security: Allow Local System to use computer identity for NTLM
+  ## Values 'Enabled'||'Disabled'
+network_security_allow_local_system_to_use_computer_identity_for_ntlm: 1
+## 2.3.11.2 - Security Options: Allow LocalSystem NULL session fallback
+  ## Values 'Enabled'||'Disabled'
+network_security_allow_localsystem_null_session_fallback: 0
+## 2.3.11.3 - Network Security: Allow PKU2U authentication requests to this computer to use online identities
+  ## Values 'Enabled'||'Disabled'
+network_security_allow_pku2u_authentication_requests_to_this_computer_to_use_online_identities: 0
+## 2.3.11.4 - Network Security: Configure encryption types allowed for Kerberos
+  ## Values: Array made up of: 'DES_CBC_CRC', 'DES_CBC_MD5', 'RC4_HMAC_MD5', 'AES128_HMAC_SHA1', 'AES256_HMAC_SHA1'
+network_security_configure_encryption_types_allowed_for_kerberos: 2147483640  # ['0x7ffffff8']
+## 2.3.11.5 - Network security: Do not store LAN Manager hash value on next password change
+  ## Values 'Enabled'||'Disabled'
+network_security_do_not_store_lan_manager_hash_value_on_next_password_change: 1
+## 2.3.11.6 - Network security: Force logoff when logon hours expire
+  ## Values 'Enabled'||'Disabled'
+network_security_force_logoff_when_logon_hours_expire: 1
+## 2.3.11.7 - Network security: LAN Manager authentication level
+  ## Values 'Send LM & NTLM responses', 'Send LM & NTLM - use NTLMv2 session security if negotiated', 'Send NTLM responses only', 'Send NTLMv2 responses only', 'Send NTLMv2 responses only. Refuse LM', 'Send NTLMv2 responses only. Refuse LM & NTLM'
+network_security_lan_manager_authentication_level: 5
+## 2.3.11.8 - Network security: LDAP client signing requirements
+  ## Values 'None', 'Negotiate Signing', 'Require Signing'
+network_security_ldap_client_signing_requirements: 1
+## 2.3.11.9 - Network security: Minimum session security for NTLM SSP based (including secure RPC) clients
+  ## Values 'Require NTLMv2 session security', 'Require 128-bit encryption', 'Both options checked'
+network_security_minimum_session_security_for_ntlm_ssp_based_including_secure_rpc_clients: '0x20080000'
+## 2.3.11.10 - Network security: Minimum session security for NTLM SSP based (including secure RPC) servers
+  ## Values 'Require NTLMv2 session security', 'Require 128-bit encryption', 'Both options checked'
+network_security_minimum_session_security_for_ntlm_ssp_based_including_secure_rpc_servers: '0x20080000'
+## 2.3.13.1 - Shutdown: Allow system to be shut down without having to log on
+  ## Values 'Enabled'||'Disabled'
+shutdown_allow_system_to_be_shut_down_without_having_to_log_on: 0
+## 2.3.15.1 - System objects: Require case insensitivity for non-Windows subsystems
+  ## Values 'Enabled'||'Disabled'
+system_objects_require_case_insensitivity_for_non_windows_subsystems: 1
+## 2.3.15.2 - System objects: Strengthen default permissions of internal system objects (e.g. Symbolic Links)
+  ## Values 'Enabled'||'Disabled'
+system_objects_strengthen_default_permissions_of_internal_system_objects_eg_symbolic_links: 1
+## 2.3.17.1 - User Account Control: Admin Approval Mode for the Built-in Administrator account
+  ## Values 'Enabled'||'Disabled'
+user_account_control_admin_approval_mode_for_the_built_in_administrator_account: {
+  'secureexchange.net': 1,
+  'gpi.cloud': 1,
+  'gcp_image': 0
+}
+## 2.3.17.2 - User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop
+  ## Values 'Enabled'||'Disabled'
+user_account_control_allow_uiaccess_applications_to_prompt_for_elevation_without_using_the_secure_desktop: 0  ## No Task
+## 2.3.17.3 - User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode
+  ## Values 'Elevate without prompting', 'Prompt for credentials on the secure desktop', 'Prompt for consent on the secure desktop', 'Prompt for credentials', 'Prompt for consent', 'Prompt for consent for non-Windows binaries'
+user_account_control_behavior_of_the_elevation_prompt_for_administrators_in_admin_approval_mode: 2
+## 2.3.17.4 - User Account Control: Behavior of the elevation prompt for standard users
+  ## Values 'Automatically deny elevation request', 'Prompt for credentials on the secure desktop', 'Prompt for credentials'
+user_account_control_behavior_of_the_elevation_prompt_for_standard_users: 0
+## 2.3.17.5 - User Account Control: Detect application installations and prompt for elevation
+  ## Values 'Enabled'||'Disabled'
+user_account_control_detect_application_installations_and_prompt_for_elevation: 1
+## 2.3.17.6 - User Account Control: Only elevate UIAccess applications that are installed in secure locations
+  ## Values 'Enabled'||'Disabled'
+user_account_control_only_elevate_uiaccess_applications_that_are_installed_in_secure_locations: 1
+## 2.3.17.7 - User Account Control: Run all administrators in Admin Approval Mode
+  ## Values 'Enabled'||'Disabled'
+user_account_control_run_all_administrators_in_admin_approval_mode: 1
+## 2.3.17.8 - User Account Control: Switch to the secure desktop when prompting for elevation
+  ## Values 'Enabled'||'Disabled'
+user_account_control_switch_to_the_secure_desktop_when_prompting_for_elevation: 1
+## 2.3.17.9 - User Account Control: Virtualize file and registry write failures to per-user locations
+  ## Values 'Enabled'||'Disabled'
+user_account_control_virtualize_file_and_registry_write_failures_to_per_user_locations: 1

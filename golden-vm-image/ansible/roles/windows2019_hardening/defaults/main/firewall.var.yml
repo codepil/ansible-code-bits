@@ -1,0 +1,7 @@
+---
+## Firewall settings
+# Tags: firewall
+firewall_profiles:
+  - 'private'
+  - 'public'
+  - 'domain'

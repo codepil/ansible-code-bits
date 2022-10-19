@@ -1,0 +1,42 @@
+---
+- name: Configure Trusted Roots Certificate autoupdate URL (Default)
+  win_regedit:
+    state: absent
+    delete_key: true
+    path: HKLM:\SOFTWARE\Microsoft\systemCertificates\AuthRoot\AutoUpdate
+    name: RootDirUrl
+  when: rootdirurl[ansible_facts['windows_domain']] == 'absent'
+  tags:
+    - misc
+    - registry
+
+- name: Configure Trusted Roots Certificate autoupdate URL (Custom)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\systemCertificates\AuthRoot\AutoUpdate
+    name: RootDirUrl
+    data: "{{ rootdirurl }}"
+    type: string
+  when: rootdirurl[execution_type] != 'absent'
+  tags:
+    - misc
+    - registry
+
+- name: Enable the Windows AutoUpdate of the untrusted CTL
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\systemCertificates\AuthRoot\AutoUpdate
+    name: EnableDisallowedCertAutoUpdate
+    data: "{{ enabledisallowedcertautoupdate }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Disable the Windows AutoUpdate of the trusted CTL
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\systemCertificates\AuthRoot\AutoUpdate
+    name: DisableRootAutoUpdate
+    data: "{{ disablerootautoupdate }}"
+    type: dword
+  tags:
+    - misc
+    - registry

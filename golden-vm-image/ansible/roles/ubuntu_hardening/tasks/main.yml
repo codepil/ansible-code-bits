@@ -1,0 +1,60 @@
+---
+#  tasks file for Ubuntu2004
+- name: Check OS version and family
+  fail:
+      msg: "This role can only be run against Ubuntu. {{ ansible_distribution }} {{ ansible_distribution_major_version }} is not supported."
+  when:
+      - not ansible_distribution == "Ubuntu"
+      - not ansible_distribution_release == "focal"
+      - not ansible_distribution_release == "bionic"
+  tags:
+      - always
+
+- name: Check ansible version
+  fail:
+      msg: You must use ansible 2.9.6 or greater!
+  when: not ansible_version.full is version_compare('2.9.6', '>=')
+  tags:
+      - always
+
+- include: prelim.yml
+  become: true
+  tags:
+      - prelim_tasks
+      - always
+
+- include: section1-initial-setup.yml
+  become: true
+  when: var_section1
+  tags: section1
+
+- include: section2-services.yml
+  become: true
+  when: var_section2
+  tags: section2
+
+- include: section3-network-configuration.yml
+  become: true
+  when: var_section3
+  tags: section3
+
+- include: section4-logging-auditing.yml
+  become: true
+  when: var_section4
+  tags: section4
+
+- include: section5-access-authentication-authorization.yml
+  become: true
+  when: var_section5
+  tags: section5
+
+- include: section6-system-maintenance.yml
+  become: true
+  when: var_section6
+  tags: section6
+
+- include: post.yml
+  become: true
+  tags:
+      - post_tasks
+      - always

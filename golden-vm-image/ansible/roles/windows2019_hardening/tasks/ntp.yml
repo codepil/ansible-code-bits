@@ -1,0 +1,16 @@
+---
+- name: Set NTP Server
+  win_regedit:
+    type: string
+    name: NtpServer
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters
+    data: "{{ ntp_server[execution_type] }}"
+  tags:
+    - ntp
+    - registry
+
+- name: Set server timezone
+  community.windows.win_timezone:
+    timezone: "{{ ntp_timezone[execution_type] }}"
+  tags:
+    - ntp

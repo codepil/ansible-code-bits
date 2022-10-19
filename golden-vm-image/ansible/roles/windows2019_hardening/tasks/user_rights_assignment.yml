@@ -1,0 +1,307 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/win_user_right_module.html
+# https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/dd349804(v=ws.10)?redirectedfrom=MSDN
+
+- name: Access Credential Manager as trusted caller (2.2.1)
+  win_user_right:
+    name: SeTrustedCredManAccessPrivilege
+    users: "{{ access_credential_manager_as_a_trusted_caller }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Access this computer from the network (2.2.2)
+  win_user_right:
+    name: SeNetworkLogonRight
+    users: "{{ access_this_computer_from_the_network }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Act as part of the operating system (2.2.3)
+  win_user_right:
+    name: SeTcbPrivilege
+    users: "{{ act_as_part_of_the_operating_system }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Adjust memory quotas for a process (2.2.6)
+  win_user_right:
+    name: SeIncreaseQuotaPrivilege
+    users: "{{ adjust_memory_quotas_for_a_process }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Allow log on locally (2.2.7)
+  win_user_right:
+    name: SeInteractiveLogonRight
+    users: "{{ allow_log_on_locally }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Allow log on through Terminal Services (2.2.9)
+  win_user_right:
+    name: SeRemoteInteractiveLogonRight
+    users: "{{ allow_log_on_through_remote_desktop_services }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Back up files and directories (2.2.10)
+  win_user_right:
+    name: SeBackupPrivilege
+    users: "{{ back_up_files_and_directories }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Change the system time (2.2.11)
+  win_user_right:
+    name: SeSystemtimePrivilege
+    users: "{{ change_the_system_time }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Change the time zone (2.2.12)
+  win_user_right:
+    name: SeTimeZonePrivilege
+    users: "{{ change_the_time_zone }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Create a pagefile (2.2.13)
+  win_user_right:
+    name: SeCreatePagefilePrivilege
+    users: "{{ create_a_pagefile }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Create a token object (2.2.14)
+  win_user_right:
+    name: SeCreateTokenPrivilege
+    users: "{{ create_a_token_object }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Create global objects (2.2.15)
+  win_user_right:
+    name: SeCreateGlobalPrivilege
+    users: "{{ create_global_objects }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Create permanent shared objects (2.2.16)
+  win_user_right:
+    name: SeCreatePermanentPrivilege
+    users: "{{ create_permanent_shared_objects }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Create symbolic links (2.2.18)
+  win_user_right:
+    name: SeCreateSymbolicLinkPrivilege
+    users: "{{ create_symbolic_links }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Debug programs (2.2.19)
+  win_user_right:
+    name: SeDebugPrivilege
+    users: "{{ debug_programs }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Deny access to this computer from the network (2.2.21)
+  win_user_right:
+    name: SeDenyNetworkLogonRight
+    users: "{{ deny_access_to_this_computer_from_the_network }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Deny Log on as a batch job (2.2.22)
+  win_user_right:
+    name: SeDenyBatchLogonRight
+    users: "{{ deny_log_on_as_a_batch_job }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Deny Log on as a service (2.2.23)
+  win_user_right:
+    name: SeDenyServiceLogonRight
+    users: "{{ deny_log_on_as_a_service }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Deny log on locally (2.2.24)
+  win_user_right:
+    name: SeDenyInteractiveLogonRight
+    users: "{{ deny_log_on_locally }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Deny log on through Terminal Services (2.2.26)
+  win_user_right:
+    name: SeDenyRemoteInteractiveLogonRight
+    users: "{{ deny_log_on_through_remote_desktop_services }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Enable computer and user accounts to be trusted for delegation (2.2.28)
+  win_user_right:
+    name: SeEnableDelegationPrivilege
+    users: "{{ enable_computer_and_user_accounts_to_be_trusted_for_delegation }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Force shutdown from a remote system (2.2.29)
+  win_user_right:
+    name: SeRemoteShutdownPrivilege
+    users: "{{ force_shutdown_from_a_remote_system }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Generate security audits (2.2.30)
+  win_user_right:
+    name: SeAuditPrivilege
+    users: "{{ generate_security_audits }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Impersonate a client after authentication (2.2.32)
+  win_user_right:
+    name: SeImpersonatePrivilege
+    users: "{{ impersonate_a_client_after_authentication }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Increase scheduling priority (2.2.33)
+  win_user_right:
+    name: SeIncreaseBasePriorityPrivilege
+    users: "{{ increase_scheduling_priority }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Load and unload device drivers (2.2.34)
+  win_user_right:
+    name: SeLoadDriverPrivilege
+    users: "{{ load_and_unload_device_drivers }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Lock pages in memory (2.2.35)
+  win_user_right:
+    name: SeLockMemoryPrivilege
+    users: "{{ lock_pages_in_memory }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Manage auditing and security log (2.2.38)
+  win_user_right:
+    name: SeSecurityPrivilege
+    users: "{{ manage_auditing_and_security_log }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Modify an object label (2.2.39)
+  win_user_right:
+    name: SeRelabelPrivilege
+    users: "{{ modify_an_object_label }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Modify firmware environment values (2.2.40)
+  win_user_right:
+    name: SeSystemEnvironmentPrivilege
+    users: "{{ modify_firmware_environment_values }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Perform volume maintenance tasks (2.2.41)
+  win_user_right:
+    name: SeManageVolumePrivilege
+    users: "{{ perform_volume_maintenance_tasks }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Profile single process (2.2.42)
+  win_user_right:
+    name: SeProfileSingleProcessPrivilege
+    users: "{{ profile_single_process }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Profile system performance (2.2.43)
+  win_user_right:
+    name: SeSystemProfilePrivilege
+    users: "{{ profile_system_performance }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Replace a process level token (2.2.44)
+  win_user_right:
+    name: SeAssignPrimaryTokenPrivilege
+    users: "{{ replace_a_process_level_token }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Restore files and directories (2.2.45)
+  win_user_right:
+    name: SeRestorePrivilege
+    users: "{{ restore_files_and_directories }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Shut down the system (2.2.46)
+  win_user_right:
+    name: SeShutdownPrivilege
+    users: "{{ shut_down_the_system }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Take ownership of files or other objects (2.2.48)
+  win_user_right:
+    name: SeTakeOwnershipPrivilege
+    users: "{{ take_ownership_of_files_or_other_objects }}"
+    action: set
+  tags:
+    - user_rights
+
+- name: Network security Force logoff when logon hours expire (2.3.11.6)
+  win_security_policy:
+    section: 'System Access'
+    key: ForceLogoffWhenHourExpire
+    value: "{{ network_security_force_logoff_when_logon_hours_expire }}"
+  tags:
+    - network_access

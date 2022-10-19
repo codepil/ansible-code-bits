@@ -1,0 +1,444 @@
+---
+- name: Audit if any world writable or unowned or ungrouped files exist
+  shell: >
+    set -o pipefail && \
+      df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f \( -perm -0002 -o -nouser -o -nogroup \)
+  args:
+    executable: /bin/bash
+  register: audit_6_1_10_12
+  changed_when: audit_6_1_10_12.stdout_lines != 0
+  when:
+    - audit_6_1_10_12.stdout_lines is defined and audit_6_1_10_12.stdout_lines|length > 0
+    - no_world_writable_files_exist
+    - no_unowned_files_or_directories_exist
+    - no_ungrouped_files_or_directories_exist
+
+- name: "Audit SUID executables"
+  block:
+    - name: "Find all SUID executables"
+      shell: df {{ item.mount }} -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -4000
+      failed_when: false
+      changed_when: false
+      register: rhel_06_1_13_perms_results
+      with_items: "{{ ansible_mounts }}"
+
+    - name: "Audit SUID executables |  Alert no SUID executables exist"
+      debug:
+        msg: "Good news! We have not found any SUID executable files on your system"
+      failed_when: false
+      changed_when: false
+      when:
+        - rhel_06_1_13_perms_results.stdout is not defined
+
+    - name: "Alert SUID executables exist"
+      debug:
+        msg: "Manual intervention is required -- SUID set on items in {{ item.item.mount }}: {{ item.stout_lines | join(', ') }}"
+      with_items: "{{ rhel_06_1_13_perms_results.stdout_lines }}"
+      when:
+        - rhel_06_1_13_perms_results.stdout is defined
+  when:
+    - audit_suid_executables
+
+- name: "AUDIT | Audit SGID executables"
+  block:
+    - name: " Audit SGID executables | Find all SGID executables"
+      shell: df {{ item.mount }} -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -2000
+      failed_when: false
+      changed_when: false
+      register: rhel_6_1_14_perms_results
+      with_items: "{{ ansible_mounts }}"
+
+    - name: "Audit SGID executables |  Alert no SGID executables exist"
+      debug:
+        msg: "Good news! We have not found any SGID executable files on your system"
+      failed_when: false
+      changed_when: false
+      when:
+        - rhel_6_1_14_perms_results.stdout is not defined
+
+    - name: "Audit SGID executables |  Alert SGID executables exist"
+      debug:
+        msg: "Manual intervention is required -- SGID set on items in {{ item.item.mount }}: {{ item.stout_lines | join(', ') }}"
+      with_items: "{{ rhel_6_1_14_perms_results.stdout_lines }}"
+      when:
+        - rhel_6_1_14_perms_results.stdout is defined
+  when:
+    - audit_sgid_executables
+
+- name: "Fail if any world writable files, no unowned files, no ungrouped files, exist"
+  fail:
+    msg: "{{ audit_6_1_10_12.stdout_lines }}"
+  when:
+    - audit_6_1_10_12.stdout_lines is defined and audit_6_1_10_12.stdout_lines|length > 0
+
+- name: "Ensure password fields are not empty"
+  command: passwd -l {{ item }}
+  changed_when: false
+  failed_when: false
+  with_items: "{{ empty_password_accounts.stdout_lines }}"
+  when:
+    - empty_password_accounts.rc
+    - password_fields_are_not_empty
+
+- name: "Ensure no legacy '+' entries exist in /etc/passwd"
+  shell: "set -o pipefail; sed -i '/^+/ d' /etc/passwd"
+  changed_when: false
+  failed_when: false
+  when:
+    - no_legacy_entries_exist_in_etc_passwd
+
+- name: "Ensure users' home directories permissions are 750 or more restrictive"
+  shell: |
+      for dir in {{ homes_with_perms.stdout }};
+      do
+        chmod g-w,o-rwx $dir;
+      done
+  when:
+    - users_home_directories_permissions_are_750_or_more_restrictive
+    - homes_with_perms.stdout | length > 0
+
+- name: "Ensure no users have .netrc files"
+  file:
+    state: absent
+    dest: "~{{ item }}/.netrc"
+  with_items: "{{ users.stdout_lines }}"
+  when:
+    - no_users_have_netrc_files
+
+- name: "Ensure no users have .forward files"
+  file:
+    state: absent
+    dest: "~{{ item }}/.forward"
+  with_items: "{{ users.stdout_lines }}"
+  when:
+    - no_users_have_forward_files
+
+- name: "Ensure no users have .rhosts files"
+  file:
+    state: absent
+    dest: "~{{ item }}/.rhosts"
+  with_items: "{{ users.stdout_lines }}"
+  when:
+    - no_users_have_rhosts_files
+
+- name: "Ensure root PATH Integrity"
+  block:
+    - name: "Ensure root PATH Integrity | Determine empty value"
+      shell: 'echo $PATH | grep ::'
+      check_mode: false
+      register: path_colon
+      changed_when: false
+      failed_when: path_colon.rc == 0
+
+    - name: "Ensure root PATH Integrity | Determin colon end"
+      shell: 'echo $PATH | grep :$'
+      check_mode: false
+      register: path_colon_end
+      changed_when: false
+      failed_when: path_colon_end.rc == 0
+
+    - name: "Ensure root PATH Integrity | Determine dot in path"
+      shell: "/bin/bash --login -c 'env | grep ^PATH=' | sed -e 's/PATH=//' -e 's/::/:/' -e 's/:$//' -e 's/:/\\n/g'"
+      check_mode: false
+      register: dot_in_path
+      changed_when: false
+      failed_when: '"." in dot_in_path.stdout_lines'
+
+    - name: "Ensure root PATH Integrity | Alert on empty value, colon end, and dot in path"
+      debug:
+        msg:
+          - "The following paths have an empty value: {{ path_colon.stdout_lines }}"
+          - "The following paths have colon end: {{ path_colon_end.stdout_lines }}"
+          - "The following paths have a dot in the path: {{ dot_in_path.stdout_lines }}"
+
+    - name: "6.2.3 | L1 | PATCH | Ensure root PATH Integrity (Scored) | Determine rights and owner"
+      file: >
+        path='{{ item }}'
+        follow=yes
+        state=directory
+        owner=root
+        mode='o-w,g-w'
+      with_items: "{{ dot_in_path.stdout_lines }}"
+
+    - name: "Ensure root PATH Integrity (collect paths)"
+      shell: |
+        set -o pipefail;
+        sudopath=($(grep secure_path /etc/sudoers | cut -f2 -d= |cut -f2 -d\"))
+        IFS=:
+        for i in ${sudopath[*]}
+        do
+          if [ -d "$i" ]
+            then newsudopath+=($i)
+          fi
+          done
+        echo "${newsudopath[*]}"
+      args:
+        executable: /bin/bash
+      register: fixsudo
+      changed_when: false
+      check_mode: false
+
+    - name: "Ensure root PATH Integrity (fix paths)"
+      lineinfile:
+        dest: /etc/sudoers
+        regexp: "(.*secure_path=).*"
+        line: '\1"{{ fixsudo.stdout_lines[0] }}"'
+        backrefs: true
+      when:
+        - fixsudo.stdout_lines[0]
+  when:
+    - root_path_integrity
+
+- name: "Ensure no legacy '+' entries exist in /etc/shadow"
+  shell: "set -o pipefail; sed -i '/^+/ d' /etc/shadow"
+  changed_when: false
+  failed_when: false
+  when:
+    - no_legacy_entries_exist_in_etc_shadow
+
+- name: "Ensure no legacy '+' entries exist in /etc/group"
+  shell: "set -o pipefail; sed -i '/^+/ d' /etc/group"
+  changed_when: false
+  failed_when: false
+  when:
+    - no_legacy_entries_exist_in_etc_group
+
+- name: "Ensure root is the only UID 0 account"
+  command: passwd -l {{ item }}
+  changed_when: false
+  failed_when: false
+  with_items: "{{ uid_zero_accounts_except_root.stdout_lines }}"
+  when:
+    - uid_zero_accounts_except_root.rc
+    - root_is_the_only_uid_0_account
+
+- name: "Ensure users' dot files are not group or world-writable"
+  block:
+    - name: "Ensure users' dot files are not group or world-writable | Check for files"
+      shell: find /home/ -name "\.*" -perm /g+w,o+w
+      changed_when: false
+      failed_when: false
+      register: rhelcis_6_2_9_audit
+
+    - name: "Ensure users' dot files are not group or world-writable | Alert on files found"
+      debug:
+        msg: "Good news! We have not found any group or world-writable dot files on your sytem"
+      when:
+        - rhelcis_6_2_9_audit.stdout is not defined
+
+    - name: "Ensure users' dot files are not group or world-writable | Changes files if configured"
+      file:
+        path: '{{ item }}'
+        mode: go-w
+      with_items: "{{ rhelcis_6_2_9_audit.stdout_lines }}"
+      when:
+        - rhelcis_6_2_9_audit.stdout is defined
+  when:
+    - users_dot_files_are_not_group_or_world_writable
+
+- name: "Ensure all groups in /etc/passwd exist in /etc/group"
+  block:
+    - name: "Ensure all groups in /etc/passwd exist in /etc/group | Check /etc/passwd entries"
+      shell: pwck -r | grep 'no group' | awk '{ gsub("[:\47]",""); print $2}'
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      register: passwd_gid_check
+
+    - name: "Ensure all groups in /etc/passwd exist in /etc/group | Print message that all groups match between passwd and group files"
+      debug:
+        msg: "Good News! There are no users that have non-existent GUIDs (Groups)"
+      when: passwd_gid_check.stdout is not defined
+
+    - name: "Ensure all groups in /etc/passwd exist in /etc/group | Print warning about users with invalid GIDs missing GID entries in /etc/group"
+      debug:
+        msg: "WARNING: The following users have non-existent GIDs (Groups): {{ passwd_gid_check.stdout_lines | join (', ') }}"
+      when: passwd_gid_check.stdout is defined
+  when:
+    - all_groups_in_etc_passwd_exist_in_etc_group
+
+- name: "Ensure no duplicate UIDs exist"
+  block:
+    - name: "| Ensure no duplicate UIDs exist | Check for duplicate UIDs"
+      shell: "pwck -r | awk -F: '{if ($3 in uid) print $1 ; else uid[$3]}' /etc/passwd"
+      changed_when: false
+      failed_when: false
+      register: user_uid_check
+
+    - name: "| Ensure no duplicate UIDs exist | Print message that no duplicate UIDs exist"
+      debug:
+        msg: "Good News! There are no duplicate UID's in the system"
+      when: user_uid_check.stdout is not defined
+
+    - name: "6.2.15 | L1 | AUDIT| Ensure no duplicate UIDs exist | Print warning about users with duplicate UIDs"
+      debug:
+        msg: "Warning: The following users have UIDs that are duplicates: {{ user_uid_check.stdout_lines }}"
+      when: user_uid_check.stdout is defined
+  when:
+    - no_duplicate_uids_exist
+
+- name: "Ensure no duplicate GIDs exist"
+  block:
+    - name: "Ensure no duplicate GIDs exist | Check for duplicate GIDs"
+      shell: "pwck -r | awk -F: '{if ($3 in users) print $1 ; else users[$3]}' /etc/group"
+      changed_when: false
+      failed_when: false
+      register: user_user_check
+
+    - name: "Ensure no duplicate GIDs exist | Print message that no duplicate GID's exist"
+      debug:
+        msg: "Good News! There are no duplicate GIDs in the system"
+      when: user_user_check.stdout is not defined
+
+    - name: "Ensure no duplicate GIDs exist | Print warning about users with duplicate GIDs"
+      debug:
+        msg: "Warning: The following groups have duplicate GIDs: {{ user_user_check.stdout_lines }}"
+      when: user_user_check.stdout is defined
+  when:
+    - no_duplicate_gids_exist
+
+- name: "Ensure no duplicate user names exist"
+  block:
+    - name: "Ensure no duplicate user names exist | Check for duplicate User Names"
+      shell: "pwck -r | awk -F: '{if ($1 in users) print $1 ; else users[$1]}' /etc/passwd"
+      changed_when: false
+      failed_when: false
+      register: user_username_check
+
+    - name: "Ensure no duplicate user names exist | Print message that no duplicate user names exist"
+      debug:
+        msg: "Good News! There are no duplicate user names in the system"
+      when: user_username_check.stdout is not defined
+
+    - name: "Ensure no duplicate user names exist | Print warning about users with duplicate User Names"
+      debug:
+        msg: "Warning: The following user names are duplicates: {{ user_username_check.stdout_lines }}"
+      when: user_username_check.stdout is defined
+  when:
+    - no_duplicate_user_names_exist
+
+- name: "Ensure no duplicate group names exist"
+  block:
+    - name: " Ensure no duplicate group names exist | Check for duplicate group names"
+      shell: 'getent passwd | cut -d: -f1 | sort -n | uniq -d'
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      register: group_group_check
+
+    - name: " Ensure no duplicate group names exist | Print message that no duplicate groups exist"
+      debug:
+        msg: "Good News! There are no duplicate group names in the system"
+      when: group_group_check.stdout is defined
+
+    - name: " Ensure no duplicate group names exist | Print warning about users with duplicate group names"
+      debug:
+        msg: "Warning: The following group names are duplicates: {{ group_group_check.stdout_lines }}"
+      when: group_group_check.stdout is not defined
+  when:
+    - no_duplicate_group_names_exist
+
+- name: "Ensure shadow group is empty"
+  block:
+    - name: "Ensure shadow group is empty | Check for shadow group and pull group id"
+      shell: "getent group shadow | cut -d: -f3"
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      register: rhelcis_shadow_gid
+
+    - name: "Ensure shadow group is empty | Check /etc/group for empty shadow group"
+      shell: grep ^shadow:[^:]*:[^:]*:[^:]+ /etc/group
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      register: rhelcis_empty_shadow
+
+    - name: "Ensure shadow group is empty | Check for users assigned to shadow"
+      shell: "getent passwd | awk -F: '$4 == '{{ rhelcis_shadow_gid.stdout }}' {print $1}'"
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      register: rhelcis_shadow_passwd
+
+    - name: "Ensure shadow group is empty | Alert shadow group is empty and no users assigned"
+      debug:
+        msg:
+          - " Good News! The shadow group is empty and there are no users assigned to shadow"
+      when:
+        - rhelcis_empty_shadow.stdout | length == 0
+        - rhelcis_shadow_passwd.stdout | length == 0
+
+    - name: "Ensure shadow group is empty | Alert shadow group is not empty"
+      debug:
+        msg:
+          - "Alert! The shadow group is not empty"
+      when:
+        - rhelcis_empty_shadow.stdout | length > 0
+
+    - name: "Ensure shadow group is empty | Alert users are using shadow group"
+      debug:
+        msg:
+          - "Alert! The following users are assigned to the shadow group, please assing them to the appropriate group"
+          - "{{ rhelcis_shadow_passwd.stdout_lines }}"
+      when:
+        - rhelcis_shadow_passwd.stdout | length > 0
+  when:
+    - shadow_group_is_empty
+
+- name: "Ensure all users' home directories exist"
+  block:
+    - name: "Ensure all users' home directories exist"
+      stat:
+        path: "{{ item }}"
+      register: rhel_6_2_20_audit
+      with_items: "{{ rhelcis_passwd | selectattr('uid', '>=', rhelcis_int_gid) | selectattr('uid', '!=', 65534) | map(attribute='dir') | list }}"
+
+    - name: " | Ensure all users' home directories exist"
+      command: find -H {{ item.0 | quote }} -not -type l -perm /027
+      check_mode: false
+      changed_when: rhel_6_2_20_patch_audit.stdout "| length > 0"
+      register: rhel_6_2_20_patch_audit
+      when:
+        - ansible_check_mode
+        - item.1.exists
+      with_together:
+        - "{{ rhel_6_2_20_audit.results | map(attribute='item') | list }}"
+        - "{{ rhel_6_2_20_audit.results | map(attribute='stat') | list }}"
+      loop_control:
+        label: "{{ item.0 }}"
+
+    - name: "Ensure all users' home directories exist"
+      file:
+        path: "{{ item.0 }}"
+        recurse: true
+        mode: a-st,g-w,o-rwx
+      register: rhel_6_2_20_patch
+      when:
+        - not ansible_check_mode
+        - item.1.exists
+      with_together:
+        - "{{ rhel_6_2_20_audit.results | map(attribute='item') | list }}"
+        - "{{ rhel_6_2_20_audit.results | map(attribute='stat') | list }}"
+      loop_control:
+        label: "{{ item.0 }}"
+
+    # set default ACLs so the homedir has an effective umask of 0027
+    - name: "Ensure all users' home directories exist"
+      acl:
+        path: "{{ item.0 }}"
+        default: true
+        state: present
+        recursive: true
+        etype: "{{ item.1.etype }}"
+        permissions: "{{ item.1.mode }}"
+      with_nested:
+        - "{{ (ansible_check_mode | ternary(rhel_6_2_20_patch_audit, rhel_6_2_20_patch)).results |
+          rejectattr('skipped', 'defined') | map(attribute='item') | map('first') | list }}"
+        -
+          - etype: group
+            mode: rx
+          - etype: other
+            mode: '0'
+  when:
+    - all_users_home_directories_exist

@@ -1,0 +1,220 @@
+# yamllint disable rule:line-length
+## 18.3.1
+LocalAccountTokenFilterPolicy: 0
+SMB1: 0
+DisableExceptionChainValidation: 0
+NodeType: 2
+## 18.3.x Security Options - MSS Policies
+## 18.3.1 - MSS: (AutoAdminLogon) Enable Automatic Logon (not recommended)
+  ## Values 0 (Disabled) ||1 (Enabled)
+mss_auto_admin_logon: 0
+## 18.3.2 - MSS: (DisableIPSourceRouting IPv6) IP source routing protection level (protects against packet spoofing)
+  ## Values 0 (No additional protection, source routed packets are allowed), 1 (Medium, source routed packets ignored when IP forwarding is enabled), 2 (Highest protection, source routing is completely disabled)
+mss_disable_ip_source_routing_ipv6: 2
+## 18.3.3 - MSS: (DisableIPSourceRouting) IP source routing protection level (protects against packet spoofing)
+  ## Values 0 (No additional protection, source routed packets are allowed), 1 (Medium, source routed packets ignored when IP forwarding is enabled), 2 (Highest protection, source routing is completely disabled)
+mss_disable_ip_source_routing: 2
+## 18.3.4 - MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes
+  ## Values 0 (Disabled) ||1 (Enabled)
+mss_enable_icmp_redirect: 0
+mss_keepalives: 300000
+## 18.3.6 - MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers
+  ## Values 0 (Disabled) ||1 (Enabled)
+mss_no_name_release_on_demand: 1
+## 18.3.7 - MSS: (PerformRouterDiscovery) Allow IRDP to detect and configure Default Gateway addresses (could lead to DoS)
+  ## Values 0 (Disabled) ||1 (Enabled) || 2 (Enabled only if DHCP sends the Perform Router Discovery option)
+mss_perform_router_discovery: 0
+## 18.3.8 - MSS: (SafeDllSearchMode) Enable Safe DLL search mode (recommended)
+  ## Values 0 (Disabled) ||1 (Enabled)
+mss_safe_dll_search_mode: 1
+## 18.3.9 - MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires (0 recommended)
+  ## Value in seconds
+mss_screen_saver_grace_period: 0
+## 18.3.10 - MSS: (TCPMaxDataRetransmissions) IPv6 How many times unacknowledged data is retransmitted (3 recommended, 5 is default)
+mss_tcp_max_data_retransmissions_ipv6: 3
+## 18.3.11 - MSS: (TCPMaxDataRetransmissions) How many times unacknowledged data is retransmitted (3 recommended, 5 is default)
+mss_tcp_max_data_retransmissions: 3
+## 18.3.12 - MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning
+  ## Value in percentage
+mss_warning_level: 90
+EnableMulticast: 1
+servermanager_autostart: 1
+## Misc. Policies
+## 18.4.14.1 - Hardened UNC Paths
+  ## Value must be 'RequireMutualAuthentication=1, RequireIntegrity=1'
+hardened_unc_paths_netlogon: 'RequireMutualAuthentication=1, RequireIntegrity=1'
+## 18.4.14.1 - Hardened UNC Paths
+  ## Value must be 'RequireMutualAuthentication=1, RequireIntegrity=1'
+hardened_unc_paths_sysvol: 'RequireMutualAuthentication=1, RequireIntegrity=1'
+## 18.6.2 - SCM: Ensure 'WDigest Authentication' is set
+  ## Value 0 (will not store credentials in memory), 1 (will store credentials in memory)
+wdigest_authentication_is_set: 0
+## 18.8.19.2 - System: Registry policy processing
+  ## Value (TODO: Research setting values)
+NoCloudApplicationNotification: 1
+system_registry_policy_processing: 1
+NoGPOListChanges: 0
+EnableCdp: 0
+DisableBkGndGroupPolicy: 0
+## 18.8.20.1.2 - System: Turn off downloading of print drivers over HTTP
+  ## Value 0 (Enable) || 1 (Disable)
+system_turn_off_downloading_of_print_drivers_over_http: 1
+PreventHandwritingDataSharing: 1
+PreventHandwritingErrorReports: 1
+ExitOnMSICW: 1
+## 18.8.20.1.6 - System: Turn off Internet download for Web publishing and online ordering wizards
+  ## Value 0 (Enable) || 1 (Disable)
+system_turn_off_internet_download_for_web_publishing_and_online_ordering_wizards: 1
+## 18.8.20.1.7 - System: Turn off printing over HTTP
+  ## Value 0 (Enable) || 1 (Disable)
+system_turn_off_printing_over_http: 1
+## 18.8.20.1.9 - System: Turn off Search Companion content file updates
+  ## Value 0 (Enable) || 1 (Disable)
+system_turn_off_search_companion_content_file_updates: 1
+NoOnlinePrintsWizard: 1
+## 18.8.20.1.11 - System: Turn off the "Publish to Web" task for files and folders
+  ## Value 0 (Enable) || 1 (Disable)
+system_turn_off_the_publish_to_web_task_for_files_and_folders: 1
+## 18.8.20.1.12 - System: Turn off the Windows Messenger Customer Experience Improvement Program
+  ## unclear on values 2 is GPO set value.
+system_turn_off_the_windows_messenger_customer_experience_improvement_program: 2
+## 18.8.20.1.12 - System: Turn off the Customer Experience Improvement Program
+  ## Value 0 (Disable) || 1 (Enable)
+system_turn_off_the_customer_experience_improvement_program: 0
+DoReport: 0
+## 18.8.25.1
+DevicePKInitEnable: 1
+## 18.8.26.1
+DeviceEnumerationPolicy: 0
+# 18.8.27.1
+BlockUserInputMethodsForSignIn: 1
+# 18.8.28.x
+BlockUserFromShowingAccountDetailsOnSignin: 1
+DontDisplayNetworkSelectionUI: 1
+DontEnumerateConnectedUsers: 1
+EnumerateLocalUsers: 0
+DisableLockScreenAppNotifications: 1
+BlockDomainPicturePassword: 0
+AllowDomainPINLogon: 0
+# 18.8.31.x
+AllowCrossDeviceClipboard: 0
+UploadUserActivities: 0
+## 18.8.31.1 - System: Offer Remote Assistance
+  ## Values 0 (Disabled) ||1 (Enabled)
+system_offer_remote_assistance: 0
+## 18.8.31.2 - System: Solicited Remote Assistance
+  ## Values 0 (Disabled) ||1 (Enabled)
+system_solicited_remote_assistance: 0
+# 18.8.37
+EnableAuthEpResolution: 1
+RestrictRemoteClients: 1
+## 18.9.8.3 - Windows Components: Turn off Autoplay
+  ## Value 32-bit value (255 = all drives)
+NoAutoplayfornonVolume: 1
+NoAutorun: 1
+windows_components_turn_off_autoplay: 255
+# 18.9.12.1
+Allow_camera: 0
+# 18.9.15.2
+EnumerateAdministrators: 0
+## 18.9.16.x
+AllowTelemetry: 0
+DoNotShowFeedbackNotifications: 1
+AllowBuildPreview: 0
+## 18.9.30.x
+NoDataExecutionPrevention: 0
+NoHeapTerminationOnCorruption: 0
+PreXPSP2ShellProtocolBehavior: 0
+# 180.9.44.1
+DisableUserAuth: 1
+DisableFileSyncNGSC: 1
+fSingleSessionPerUser: 1
+## 18.9.52.2.2 - Windows Components: Do not allow passwords to be saved
+  ## Values 0 (Disabled) ||1 (Enabled)
+windows_components_do_not_allow_passwords_to_be_saved: 1
+## 18.9.52.3.9.3 - Windows Components: Set client connection encryption level
+  ## Values 1 (Low level of encryption), 2 (Client-compatible level of encryption), 3 (High level of encryption), 4 (FIPS-compliant encryption)
+windows_components_set_client_connection_encryption_level: 3
+## N/A - Windows Components: Always prompt client for password upon connection
+  ## Values 0 (Disabled) ||1 (Enabled)
+windows_components_always_prompt_client_for_password_upon_connection: 1
+## N/A - Recovery console: Allow automatic administrative logon
+  ## Values 0 (Disabled) ||1 (Enabled)
+recovery_console_allow_automatic_administrative_logon: 0
+## N/A - Disable remote Desktop Sharing
+  ## Values 0 (Allow desktop sharing) ||1 (Disable desktop sharing)
+disable_remote_desktop_sharing: 1
+## N/A - Group Policy refresh interval for computers GroupPolicyRefreshTime
+  ## Value in minutes
+group_policy_refresh_interval_for_computers_groupolicyrefreshtime: 15
+## N/A - Group Policy refresh interval for computers GroupPolicyRefreshTimeOffset
+  ## Value in minutes
+group_policy_refresh_interval_for_computers_groupolicyrefreshtimeoffset: 2
+## N/A - Recovery console: Allow floppy copy and access to all drives and all folders
+  ## Values 0 (Disabled) ||1 (Enabled)
+recovery_console_allow_floppy_copy_and_access_to_all_drives_and_all_folders: 0
+## N/A - Shutdown: Clear virtual memory pagefile
+  ## Values 0 (Disabled) ||1 (Enabled)
+shutdown_clear_virtual_memory_pagefile: 1
+## N/A - Require trusted path for credential entry
+  ## Values 0 (Disabled) ||1 (Enabled)
+require_trusted_path_for_credential_entry: 0
+## N/A - NtfsDisable8dot3NameCreation
+  ## Values 0 (Disabled) ||1 (Enabled)
+ntfsdisable8dot3namecreation: 1
+## N/A - DNS Suffix Search List
+  ## Values comma separated list of domains
+dns_suffix_search_list: {
+  'secureexchange.net': 'secureexchange.net,hps.com,hpydat.net,hpypep.net,hpypyr.net,e-hps.com',
+  'gpi.cloud': 'gpi.cloud',
+  'gcp_image': ''
+}
+## N/A - MSS: (NoDefaultExempt) Configure IPSec exemptions for various types of network traffic
+  ## Value 1 (Kerberos and RSVP traffic are not exempt from IPSec filtering, but multicast, broadcast, and ISAKMP traffic are exempt.)
+  ##       2 (multicast and broadcast traffic are not exempt from IPSec filtering, but RSVP, Kerberos, and ISAKMP traffic are exempt.)
+  ##       3 (only ISAKMP traffic is exempt from IPSec filtering. This is the default filtering behavior for Windows Server 2003.)
+mss_nodefaultexempt_configure_ipsec_exemptions_for_various_types_of_network_traffic: 3
+## N/A - System settings: Optional subsystems
+  ## Values '' (Not defined) || 'User-defined list of subsystems'
+system_settings_optional_subsystems: ''
+## N/A - System cryptography: Force strong key protection for user keys stored on the computer
+  ## Values 0 (User input is not required when new keys are stored and used) ||
+  ##        1 (User is prompted when the key is first used) ||
+  ##        2 (User must enter a password each time they use a key)
+system_cryptography_force_strong_key_protection_for_user_keys_stored_on_the_computer: 1
+dc_Arp_Retry_Count: 3
+# 18.9.59.
+fEncryptRPCTraffic: 1
+SecurityLayer: 2
+MaxDisconnectionTime: 7200000
+DeleteTempDirsOnExit: 1
+PerSessionTempDir: 1
+
+# WinRM Configurations
+allow_basic_authentication_winrm_client: 0
+allow_allow_unencrypted_traffic_winrm_client: 0
+allow_allow_digest_authentication_winrm_client: 0
+allow_basic_authentication_winrm_service: 1
+allow_allow_auto_config_winrm_service: 1
+allow_allow_unencrypted_traffic_winrm_service: 0
+disable_winrm_service_from_storing_runas_credentials: 1
+
+# Manage NLA registry
+nla_enable: 1
+
+## More settings added by Duke these don't really fall under the above categories, will be added to cipher_policies
+## N/A - Disable SMBv1
+disable_smbv1: 0
+strongkey: 1
+dc_FeatureSettingsOverrideMask: 3
+dc_FeatureSettingsOverride: 0
+DisableIE: {
+  'secureexchange.net': 'Disable-Feature',
+  'gpi.cloud': 'Disable-Feature',
+  'gcp_image': 'Enable-Feature'  ## Not in OSCB
+}
+
+# variables to disable windows updates
+DisableWindowsUpdateAccess: 0
+DoNotConnectToWindowsUpdateInternetLocations: 0
+SetDisableUXWUAccess: 1

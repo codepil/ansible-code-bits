@@ -1,0 +1,58 @@
+---
+manual_services:
+  - msiserver          # Windows Installer
+  - BITS               # Background Intelligent Transfer Service
+enabled_services_domain:
+  - Netlogon           # Netlogon
+enabled_services:
+  - Appinfo            # Application Information (Manual)
+  - AppMgmt            # Application Management (Manual)
+  - BFE                # Base Filtering Engine
+  - CertPropSvc        # Certificate Propagation (Manual)
+  - CryptSvc           # Cryptographic Services
+  - DcomLaunch         # DCOM Server Process Launcher
+  - Dhcp               # DHCP Client
+  - Dnscache           # DNS Client
+  - DPS                # Diagnostic Policy Service
+  - EventLog           # Windows Event Log
+  - EventSystem        # COM+ Event System
+  - FontCache          # Windows Font Cache Service
+  - gpsvc              # Group Policy Client
+  - iphlpsvc           # IP Helper
+  - KeyIso             # CNG Key Isolation
+  - LanmanServer       # Server
+  - LanmanWorkstation  # Workstation
+  - lmhosts            # TCP/IP NetBIOS Helper
+  - MpsSvc             # Windows Firewall
+  - MSDTC              # Distributed Transaction Coordinator
+  - Netman             # Network Connections
+  - netprofm           # Network List Service
+  - NlaSvc             # Network Location Awareness
+  - nsi                # Network Store Interface Service
+  - WinRM              # Windows Remote Management (WS-Manag...
+  - PlugPlay           # Plug and Play
+  - PolicyAgent        # IPsec Policy Agent
+  - Power              # Power
+  - ProfSvc            # User Profile Service
+  - RemoteRegistry     # Remote Registry
+  - RpcEptMapper       # RPC Endpoint Mapper
+  - RpcSs              # Remote Procedure Call (RPC)
+  - SamSs              # Security Accounts Manager
+  - Schedule           # Task Scheduler
+  - SENS               # System Event Notification Service
+  - SessionEnv         # Remote Desktop Configuration
+  - ShellHWDetection   # Shell Hardware Detection
+  - Winmgmt            # Windows Management Instrumentation
+  - TermService        # Remote Desktop Services
+  - TrkWks             # Distributed Link Tracking Client
+  - UmRdpService       # Remote Desktop Services UserMode Po...
+  - w32time            # Windows Time
+  - wuauserv           # Windows Update
+
+disabled_services:
+  - RemoteAccess       # Routing and Remote Access
+  - SharedAccess       # Internet Connection Sharing (ICS)
+  - SSDPSRV            # SSDP Discovery
+  - upnphost           # UPnP Device Host
+  - Spooler            # Print Spooler  ##CSIRT-5619
+  - Browser            # Computer Browser

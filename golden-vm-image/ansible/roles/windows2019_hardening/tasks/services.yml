@@ -1,0 +1,39 @@
+---
+- name: Windows Services Status (Disabled)
+  win_service:
+    name: "{{ item }}"
+    start_mode: 'manual'
+  loop: "{{ disabled_services }}"
+  tags:
+    - audit_policy
+    - disabled_services
+
+- name: Windows Services Status (Manual)
+  win_service:
+    name: "{{ item }}"
+    start_mode: 'manual'
+  loop: "{{ manual_services }}"
+  tags:
+    - audit_policy
+    - manual_services
+
+- name: Windows Services Status (Automatic)
+  win_service:
+    name: "{{ item }}"
+    start_mode: 'auto'
+    state: 'started'
+  loop: "{{ enabled_services }}"
+  tags:
+    - audit_policy
+    - automatic_services
+
+- name: Windows Services Status Domain Only (Automatic)
+  win_service:
+    name: "{{ item }}"
+    start_mode: 'auto'
+    state: 'started'
+  loop: "{{ enabled_services_domain }}"
+  tags:
+    - audit_policy
+    - automatic_services
+  when: ansible_facts['windows_domain_member'] == 'true'

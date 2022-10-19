@@ -1,0 +1,158 @@
+---
+- name: "Ensure auditd is installed"
+  apt:
+      name: audispd-plugins
+      state: present
+      install_recommends: false
+  when:
+      - auditd_is_installed
+
+- name: "Ensure auditd service is enabled"
+  service:
+      name: auditd
+      state: started
+      enabled: true
+  when:
+      - auditd_service_is_enabled
+
+- name: "Ensure auditing for processes that start prior to auditd is enabled"
+  replace:
+      dest: /etc/default/grub
+      regexp: '^(GRUB_CMDLINE_LINUX=(?!.*audit)\"[^\"]*)(\".*)'
+      replace: '\1 audit=1\2'
+  notify:
+      - generate new grub config
+  when:
+      - auditing_for_processes_that_start_prior_to_auditd_is_enabled
+
+- name: "Ensure audit_backlog_limit is sufficient"
+  replace:
+      dest: /etc/default/grub
+      regexp: '^(GRUB_CMDLINE_LINUX=(?!.*audit_backlog_limit)\"[^\"]*)(\".*)'
+      replace: '\1 audit_backlog_limit={{ var_auditd_backlog_limit }}\2'
+  notify:
+      - generate new grub config
+  when:
+      - audit_backlog_limit_is_sufficient
+
+
+- name: Configure audit log storage size
+  lineinfile:
+      path: /etc/audit/auditd.conf
+      regexp: "{{ item.regex }}"
+      line: "{{ item.value }}"
+      state: present
+  loop:
+      - {regex: '^max_log_file\s+=', value: 'max_log_file = {{ var_max_log_file }}'}
+      - {regex: '^max_log_file_action\s+=', value: 'max_log_file_action = {{ var_max_log_file_action }}'}
+      - {regex: '^space_left_action\s+=', value: 'space_left_action = {{ var_space_left_action }}'}
+      - {regex: '^action_mail_acct\s+=', value: 'action_mail_acct = {{ var_action_mail_acct }}'}
+      - {regex: '^admin_space_left_action\s+=', value: 'admin_space_left_action = {{ var_admin_space_left_action }}'}
+      - {regex: '^admin_space_left\s+=', value: 'admin_space_left = {{ var_admin_space_left }}'}
+  when:
+      - audit_log_file_size_and_keep_log
+
+- name: "audit_events_collected"
+  template:
+      src: audit/30-pci-ds3-audit-ubuntu-2004.rules
+      dest: /etc/audit/rules.d/30-pci-ds3-audit-ubuntu-2004.rules
+      mode: og-rwx
+  when:
+      - audit_events_collected
+
+- name: "Ensure rsyslog is installed"
+  apt:
+      name: rsyslog
+      state: present
+      install_recommends: false
+  when:
+      - rsyslog_is_installed
+      - var_syslog == "rsyslog"
+
+- name: "Ensure rsyslog Service is enabled"
+  service:
+      name: rsyslog
+      enabled: true
+  changed_when: false
+  when:
+      - rsyslog_service_is_enabled
+      - var_syslog == "rsyslog"
+
+- name: "Ensure logging is configured"
+  command: /bin/true
+  changed_when: false
+  when:
+      - logging_is_configured
+
+- name: "Ensure rsyslog default file permissions configured"
+  lineinfile:
+      dest: /etc/rsyslog.conf
+      regexp: '^\$FileCreateMode'
+      line: '$FileCreateMode 0640'
+  when:
+      - rsyslog_default_file_permissions_configured
+
+- name: "Ensure remote rsyslog accepted on designated log hosts."
+  # In default $ModLoad imtcp and $InputTCPServerRun 514 are commented out.
+  command: /bin/true
+  changed_when: false
+  when:
+      - remote_rsyslog_accepted_on_designated_log_hosts
+
+- name: "Journald is configured to send logs to rsyslog\n
+         Journald is configured to compress large log files\n
+         Journald is configured to write logfiles to persistent disk"
+  lineinfile:
+      path: /etc/systemd/journald.conf
+      regexp: "{{ item.regex }}"
+      line: "{{ item.value }}"
+      state: present
+  loop:
+      - {regex: '^ForwardToSyslog=', value: 'ForwardToSyslog=yes'}
+      - {regex: '^Compress=', value: 'Compress=yes'}
+      - {regex: '^Storage=', value: 'Storage=persistent'}
+  when:
+      - journald_is_configured_to_send_logs_to_rsyslog
+      - journald_is_configured_to_compress_large_log_files
+      - journald_is_configured_to_write_to_persistent_disk
+
+- name: "Ensure permissions on all logfiles are configured"
+  command: find /var/log -type f -exec chmod g-wx,o-rwx {} +
+  changed_when: false
+  failed_when: false
+  when:
+      - permissions_on_all_logfiles_are_configured
+
+- name: "Ensure logrotate is configured"
+  block:
+      - name: "Register logrotate.d files"
+        find:
+            paths: /etc/logrotate.d/
+        register: log_rotates
+
+      - name: "Ensure logrotate.conf exists"
+        file:
+            path: /etc/logrotate.conf
+            state: touch
+            mode: "644"
+        changed_when: false
+
+      - name: "Ensure logrotate is configured"
+        replace:
+            path: "{{ item.path }}"
+            regexp: '^(\s*)(daily|weekly|monthly|yearly)$'
+            replace: "\\1{{ var_logrotate }}"
+        with_items:
+            - "{{ log_rotates.files }}"
+            - {path: "/etc/logrotate.conf"}
+  when:
+      - logrotate_is_configured
+
+- name: "Ensure logrotate assigns appropriate permissions"
+  lineinfile:
+      state: present
+      dest: /etc/logrotate.conf
+      regexp: '^create'
+      line: 'create 0640'
+  when:
+      - logrotate_assigns_appropriate_permissions

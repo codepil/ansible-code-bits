@@ -1,0 +1,69 @@
+# yamllint disable rule:line-length
+---
+## 2.2.X User Rights Assignments - Common SIDs for Windows accounts - https://msdn.microsoft.com/en-us/library/cc980032.aspx
+access_credential_manager_as_a_trusted_caller: []
+access_this_computer_from_the_network: ['Administrators', 'Authenticated Users']
+act_as_part_of_the_operating_system: []
+adjust_memory_quotas_for_a_process: ['NETWORK SERVICE', 'LOCAL SERVICE', 'Administrators']
+allow_log_on_locally: ['Administrators']
+allow_log_on_through_remote_desktop_services: ['Administrators', 'Remote Desktop Users']
+back_up_files_and_directories: ['Administrators']
+change_the_system_time: ['LOCAL SERVICE', 'Administrators']
+change_the_time_zone: ['LOCAL SERVICE', 'Administrators']
+create_a_pagefile: ['Administrators']
+create_a_token_object: []
+create_global_objects: ['Administrators', 'LOCAL SERVICE', 'NETWORK SERVICE', 'SERVICE']
+create_permanent_shared_objects: []
+create_symbolic_links: ['Administrators']
+debug_programs: ['Administrators']
+deny_access_to_this_computer_from_the_network: ['Guests']
+deny_log_on_as_a_batch_job: ['Guests']
+deny_log_on_as_a_service: ['Guests']
+deny_log_on_locally: ['Guests']
+deny_log_on_through_remote_desktop_services: ['Guests']
+enable_computer_and_user_accounts_to_be_trusted_for_delegation: []
+force_shutdown_from_a_remote_system: ['Administrators']
+generate_security_audits: ['LOCAL SERVICE', 'NETWORK SERVICE']
+impersonate_a_client_after_authentication: ['Administrators', 'SERVICE', 'Local Service', 'Network Service']
+increase_scheduling_priority: ['Administrators']
+load_and_unload_device_drivers: ['Administrators']
+lock_pages_in_memory: []
+manage_auditing_and_security_log: ['Administrators']
+modify_an_object_label: []
+modify_firmware_environment_values: ['Administrators']
+perform_volume_maintenance_tasks: 'Administrators'
+profile_single_process: ['Administrators']
+profile_system_performance: ['Administrators', 'NT Service\WdiServiceHost']
+replace_a_process_level_token: ['LOCAL SERVICE', 'NETWORK SERVICE', 'Administrators', 'Backup Operators']
+restore_files_and_directories: ['Administrators', 'Backup Operators']
+shut_down_the_system: ['Administrators']
+take_ownership_of_files_or_other_objects: ['Administrators']
+## 2.3.Xs
+# 2.3.1.1 - Account: Administrator Account Status
+## Values '0 - Disabled'||'1 - Enabled'
+accounts_administrator_account_status: {
+  'secureexchange.net': 1,
+  'gpi.cloud': 1,
+  'gcp_image': 1
+}
+# 2.3.1.2 - Accounts: Block Microsoft account
+## Values: 'This policy is disabled' || 'Users cant add Microsoft accounts' || 'Users cant add or log on with Microsoft accounts'
+accounts_block_microsoft_accounts: 3
+# 2.3.1.3 - Accounts: Guest account status
+ ## Values 'Enabled'||'Disabled'
+accounts_guest_account_status: 0
+## 2.3.1.4 - Accounts: Limit local account use of blank passwords to console logon only
+  ## Values 'Enabled'||'Disabled'
+accounts_limit_local_account_use_of_blank_passwords_to_console_logon_only: 1
+## 2.3.1.5 - Accounts: Rename administrator account--Edited to match HPY policy
+accounts_rename_administrator_account: {
+  'secureexchange.net': 'shiner',
+  'gpi.cloud': 'batman',
+  'gcp_image': 'Administrator'
+}
+## 2.3.1.6 - Accounts: Rename guest account
+accounts_rename_guest_account: {
+  'secureexchange.net': 'budlight',
+  'gpi.cloud': 'robin',
+  'gcp_image': 'Guest'
+}

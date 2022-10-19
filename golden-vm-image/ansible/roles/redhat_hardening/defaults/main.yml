@@ -1,0 +1,725 @@
+---
+# Which sections to run.
+var_section1: true
+var_section2: true
+var_section3: true
+var_section4: true
+var_section5: true
+var_section6: true
+#
+var_custom_section1: true
+
+# 1 CIS_Initial_Setup_rules
+# 1.1_Filesystem_Configuration
+# CIS 1.1.1 Disable_unused_filesystems
+disable_unused_filesystems: true
+# 1_1_1 takes care of  1.1.1.1, 1.1.1.2,  1.1.1.4
+# vFAT cannot be disabed as its used by /boot/efi.
+# CIS_rule_1.1.1.1 mounting_of_cramfs_filesystems_is_disabled: true
+# CIS_rule_1.1.1.2 mounting_of_vFAT_filesystems_is_limited: false
+# CIS_rule_1.1.1.3 mounting_of_squashfs_filesystems_is_disabled: true
+# CIS_rule_1.1.1.4 mounting_of_udf_filesystems_is_disabled: true
+
+# CIS_rule_1.1.2
+tmp_is_configured: true
+# CIS_rule_1.1.3
+nodev_option_set_on_tmp_partition: true
+# CIS_rule_1.1.4
+nosuid_option_set_on_tmp_partition: true
+# CIS_rule_1.1.5
+noexec_option_set_on_tmp_partition: true
+# CIS_rule_1.1.6
+separate_partition_exists_for_var: false
+# TODO: No action yet, the story US244098 is in backlog. 1.1.6 to 1.1.14
+# Will require partition of disk. Not usually done in cloud vms.
+# CIS_rule_1.1.7
+separate_partition_exists_for_var_tmp: false
+# CIS_rule_1.1.8
+nodev_option_set_on_var_tmp_partition: false
+# CIS_rule_1.1.9
+nosuid_option_set_on_var_tmp_partition: false
+# CIS_rule_1.1.10
+noexec_option_set_on_var_tmp_partition: false
+# CIS_rule_1.1.11
+separate_partition_exists_for_var_log: false
+# CIS_rule_1.1.12
+separate_partition_exists_for_var_log_audit: false
+# CIS_rule_1.1.13
+separate_partition_exists_for_home: false
+# CIS_rule_1.1.14
+nodev_option_set_on_home_partition: false
+# CIS_rule_1.1.15
+nodev_option_set_on_dev_shm_partition: true
+# CIS_rule_1.1.16
+nosuid_option_set_on_dev_shm_partition: faltruese
+# CIS_rule_1.1.17
+noexec_option_set_on_dev_shm_partition: true
+# CIS_rule_1.1.18 # No media in cloud vms.
+nodev_option_set_on_removable_media_partitions: false
+# CIS_rule_1.1.19
+nosuid_option_set_on_removable_media_partitions: false
+# CIS_rule_1.1.20
+noexec_option_set_on_removable_media_partitions: false
+# CIS_rule_1.1.21
+sticky_bit_is_set_on_all_world_writable_directories: true
+# CIS_rule_1.1.22
+disable_automounting: true
+# CIS_rule_1.1.23 disable_usb_storage  taken care in 1_1_1
+disable_usb_storage: true
+# CIS 1.2 Configure_Software_Updates
+# Regular patching method needs to be decided and used
+# CIS_rule_1.2.1
+red_hat_subscription_manager_connection_is_configured: false
+# Details of subscription not know currently.
+# CIS_rule_1.2.2
+disable_the_rhnsd_daemon: true
+# CIS_rule_1.2.3
+gpg_keys_are_configured: false
+# GPG_keys depends on patching source to protect against spoofing.
+# CIS_rule_1.2.4
+gpgcheck_is_globally_activated: true
+# CIS_rule_1.2.5
+# Regular patching method needs to be decided and used.
+package_manager_repositories_are_configured: false
+# CIS_1_3 Configure_sudo
+# CIS_rule_1.3.1
+sudo_is_installed: true
+# CIS_rule_1.3.2
+sudo_commands_use_pty: true
+# CIS_rule_1.3.3
+sudo_log_file_exists: true
+# CIS 1.4 Filesystem Integrity Checking
+
+# CIS_rule_1.5 Secure_Boot_Settings
+# Set permissions on various files as per various rules of CIS
+permissions_on_files: true
+# CIS_rule_1.5.1 permissions_on_bootloader_config_are_configured: true
+# taken care by permissions_on_files
+
+# CIS_rule_1.5.2
+bootloader_password_is_set: false
+# CIS_rule_1.5.3
+authentication_required_for_single_user_mode: true
+# CIS 1.6 Additional_Process_Hardening
+# CIS_rule_1.6.1
+core_dumps_are_restricted: true
+# CIS_rule_1.6.2
+address_space_layout_randomization_aslr_is_enabled: true
+
+
+# CIS_1.7_Mandatory_Access_Control
+# CIS_1.7.1_Configure_SELinux
+
+# CIS_rule_1.7.1.1
+selinux_is_installed: true
+# CIS_rule_1.7.1.2
+selinux_is_not_disabled_in_bootloader_configuration: true
+# CIS_rule_1.7.1.3
+selinux_policy_is_configured: falstruee
+# CIS_rule_1.7.1.4
+selinux_state_is_enforcing: true
+
+# CIS_rule_1.7.1.5
+no_unconfined_services_exist: true
+# CIS_rule_1.7.1.6
+setroubleshoot_is_not_installed: true
+# CIS_rule_1.7.1.7
+mcs_translation_service_mcstrans_is_not_installed: true
+
+# CIS_1.8_Warning_Banners
+# CIS 1.8.1 Command_Line_Warning_Banners
+# CIS_rule_1.8.1.1
+message_of_the_day_is_configured_properly: true
+# CIS_rule_1.8.1.2
+local_login_warning_banner_is_configured_properly: true
+# CIS_rule_1.8.1.3
+remote_login_warning_banner_is_configured_properly: true
+# CIS_rule_1.8.1.4 permissions_on_etc_motd_are_configured: true
+# taken care by permissions_on_files
+# CIS_rule_1.8.1.5 permissions_on_etc_issue_are_configured: true
+# taken care by permissions_on_files
+# CIS_rule_1.8.1.6 permissions_on_etc_issue.net_are_configured: true
+# taken care by permissions_on_files
+
+# CIS_rule_1.8.2 gdm is removed
+gdm_login_banner_is_configured: true
+# CIS_rule_1.9_
+updates_patches_and_additional_security_software_are_installed: true
+# CIS_rule_1.10
+# Set to DEFAULT via var_system_crypto_policy
+system_wide_crypto_policy_is_not_legacy: true
+# CIS_rule_1.11  is for CIS Level 2 - Server.
+# Set var_system_crypto_policy if required to FUTURE or FIPS
+system_wide_crypto_policy_is_future_or_fips: false
+
+
+# CIS_section_2_Services
+# CIS_2.1_inetd_Services
+# CIS_rule_2.1.1
+xinetd_is_not_installed: true
+
+# CIS_2.2_Special_Purpose_Services
+# CIS_2.2.1_Time_Synchronization
+# CIS_rule_2.2.1.1
+time_synchronization_is_in_use: true
+# CIS_rule_2.2.1.2
+chrony_is_configured: true
+# CIS_rule_2.2.2
+x_window_system_is_not_installed: true
+
+# CIS rule disable unwanted services
+# takes care of 2.2.3 to 2.2.17
+disable_remove_unwanted_services: true
+# CIS_rule_2.2.3 rsync_service_is_not_enabled: true
+# CIS_rule_2.2.4 Avahi_Server_is_not_enabled: true
+# CIS_rule_2.2.5 SNMP_Server_is_not_enabled: true
+# CIS_rule_2.2.6 HTTP_Proxy_Server_is_not_enabled: true
+# CIS_rule_2.2.7 Samba_is_not_enabled: true
+# CIS_rule_2.2.8 IMAP_and_POP3_server_is_not_enabled: true
+# CIS_rule_2.2.9 HTTP_server_is_not_enabled: true
+# CIS_rule_2.2.10 FTP_Server_is_not_enabled: true
+# CIS_rule_2.2.11 DNS_Server_is_not_enabled: true
+# CIS_rule_2.2.12 NFS_is_not_enabled: true
+# CIS_rule_2.2.13
+rpc_is_not_enabled: true
+# CIS_rule_2.2.14 LDAP_server_is_not_enabled: true
+# CIS_rule_2.2.15 DHCP_Server_is_not_enabled: true
+# CIS_rule_2.2.16 CUPS_is_not_enabled: true
+# CIS_rule_2.2.17 NIS_Server_is_not_enabled: true
+
+# CIS_rule_2.2.18
+mail_transfer_agent_is_configured_for_local_only_mode: true
+
+# CIS_rule_2.3 Service_Clients
+# CIS_rule_2.3.1
+nis_client_is_not_installed: true
+# CIS_rule_2.3.
+telnet_client_is_not_installed: true
+# CIS_rule_2.3.3
+ldap_client_is_not_installed: true
+
+
+# CIS_section_3_Network_Configuration
+# done with task disable_remove_unwanted_services
+set_network_parameters: true
+
+# set_network_parameters takes care of 3.1.1 to 3.2.9
+# CIS_3.1_Network_Parameters_Host_Only
+# CIS_rule_3.1.1 IP_forwarding_is_disabled: true
+# CIS_rule_3.1.2 packet_redirect_sending_is_disabled: true
+# CIS_3.2_Network_Parameters_Host_and_Router
+# CIS_rule_3.2.1 source_routed_packets_are_not_accepted: true
+# CIS_rule_3.2.2 ICMP_redirects_are_not_accepted: true
+# CIS_rule_3.2.3 secure_ICMP_redirects_are_not_accepted: true
+# CIS_rule_3.2.4 suspicious_packets_are_logged: true
+# CIS_rule_3.2.5 broadcast_ICMP_requests_are_ignored: true
+# CIS_rule_3.2.6 bogus_ICMP_responses_are_ignored: true
+# CIS_rule_3.2.7 Reverse_Path_Filtering_is_enabled: true
+# CIS_rule_3.2.8 TCP_SYN_Cookies_is_enabled: true
+# CIS_rule_3.2.9 IPv6_router_advertisements_are_not_accepted: true
+
+# CIS_rule_3.3
+# 3_3_1 to 3.3.4_DCCP,SCTP,RDS, TIPC is_disabled
+# taken care in 1_1_1 disable_unused_filesystems
+# CIS_rule_3.3.1 DCCP_is_disabled: true
+# CIS_rule_3.3.2 SCTP_is_disabled: true
+# CIS_rule_3.3.3 RDS_is_disabled: true
+# CIS_rule_3.3.4 TIPC_is_disabled: true
+
+# CIS 3.4
+firewall_configuration: true  # This removes all OS firewall
+# as in GCP OS firewalls will not be used.
+# done via task disable_remove_unwanted_services
+# 3_4_1_1 to 3.4.4.2.5  not required as OS firewall is not in use.
+# GCP firewall will be used: false
+# CIS_rule_3.4.1 Firewall_software_is_installed: false
+# CIS_rule_3.4.1.1 # Firewall_package_is_installed: false
+# CIS 3.4.2 Configure_firewalld: false
+# CIS_rule_3.4.2.1 firewalld_service_is_enabled_and_running: false
+# CIS_rule_3.4.2.2 iptables_service_is_not_enabled_with_firewalld: false
+# CIS_rule_3.4.2.3 nftables_is_not_enabled_with_firewalld: false
+# CIS_rule_3.4.2.4 firewalld_default_zone_is_set: false
+# CIS_rule_3.4.2.5 network_interfaces_are_assigned_to_appropriate_zone: false
+# CIS_rule_3.4.2.6 firewalld_drops_unnecessary_services_and_ports: false
+# CIS_rule_3.4.3 Configure_nftables: false
+# CIS_rule_3.4.3.1 iptables_are_flushed_with_nftables: false
+# CIS_rule_3.4.3.2 nftables_table_exists: false
+# CIS_rule_3.4.3.3 nftables_base_chains_exist: false
+# CIS_rule_3.4.3.4 nftables_loopback_traffic_is_configured: false
+# CIS_rule_3.4.3.5 nftables_outbound_and_established_connections_are_configured: false
+# CIS_rule_3.4.3.6 nftables_default_deny_firewall_policy: false
+# CIS_rule_3.4.3.7 nftables_service_is_enabled: false
+# CIS_rule_3.4.3.8 nftables_rules_are_permanent: false
+# CIS_3.4.4_Configure_iptables
+# CIS_rule_3.4.4.1.1 iptables_default_deny_firewall_policy: false
+# CIS_rule_3.4.4.1.2 iptables_loopback_traffic_is_configured: false
+# CIS_rule_3.4.4.1.3 iptables_outbound_and_established_connections_are_configured: false
+# CIS_rule_3.4.4.1.4 iptables_firewall_rules_exist_for_all_open_ports: false
+# CIS_rule_3.4.4.1.5 iptables_is_enabled_and_active: false
+# CIS_rule_3.4.4.2.1 ip6tables_default_deny_firewall_policy: false
+# CIS_rule_3.4.4.2.2 ip6tables_loopback_traffic_is_configured: false
+# CIS_rule_3.4.4.2.3 ip6tables_outbound_and_established_connections_are_configured: false
+# CIS_rule_3.4.4.2.4 ip6tables_firewall_rules_exist_for_all_open_ports: false
+# CIS_rule_3.4.4.2.5 ip6tables_is_enabled_and_active: false
+# CIS_rule_3.5
+wireless_interfaces_are_disabled: true
+# CIS_rule_3.6
+disable_ipv6: false
+
+
+# CIS_Section_4_Logging_and_Auditing
+# 4.1_Configure_System_Accounting
+# CIS 4.1.1 auditing_is_enabled: true
+# CIS_rule_4.1.1.1
+auditd_is_installed: true
+# CIS_rule_4.1.1.2
+auditd_service_is_enabled: true
+# CIS_rule_4.1.1.3
+auditing_for_processes_that_start_prior_to_auditd_is_enabled: true
+
+# CIS rule takes care of 4_1_1_4_to_4_1_2_3
+audit_log_file_size_and_keep_log: true
+# CIS_rule_4.1.1.4
+audit_backlog_limit_is_sufficient: true
+# CIS_4.1.2_Configure_Data_Retention
+# CIS_rule_4.1.2.1 audit_log_storage_size_is_configured: true
+# CIS_rule_4.1.2.2 audit_logs_are_not_automatically_deleted: true
+# CIS_rule_4.1.2.3 system_is_disabled_when_audit_logs_are_full: true
+
+# CIS rule 4_1_3_to_17
+audit_events_collected: true
+# CIS_rule_4.1.3  changes_to_system_administration_scope_sudoers_is_collected: true
+# CIS_rule_4.1.4  login_and_logout_events_are_collected: true
+# CIS_rule_4.1.5  session_initiation_information_is_collected: true
+# CIS_rule_4.1.6  events_that_modify_date_and_time_information_are_collected: true
+# CIS_rule_4.1.7  events_that_modify_the_system_s_Mandatory_Access_Controls_are_collected: true
+# CIS_rule_4.1.8  events_that_modify_the_system_s_network_environment_are_collected: true
+# CIS_rule_4.1.9  discretionary_access_control_permission_modification_events_are_collected: true
+# CIS_rule_4.1.10  unsuccessful_unauthorized_file_access_attempts_are_collected: true
+# CIS_rule_4.1.11  events_that_modify_user_group_information_are_collected: true
+# CIS_rule_4.1.12  successful_file_system_mounts_are_collected: true
+# CIS_rule_4.1.13  use_of_privileged_commands_is_collected: true
+# CIS_rule_4.1.14  file_deletion_events_by_users_are_collected: true
+# CIS_rule_4.1.15  kernel_module_loading_and_unloading_is_collected: true
+# CIS_rule_4.1.16  system_administrator_actions_sudolog_are_collected: true
+# CIS_rule_4.1.17  the_audit_configuration_is_immutable: true
+
+# CIS_4.2_Configure_Logging
+# CIS_4.2.1_Configure_rsyslog
+# CIS_rule_4.2.1.1
+rsyslog_is_installed: true
+# CIS_rule_4.2.1.2
+rsyslog_service_is_enabled: true
+# CIS_rule_4.2.1.3
+rsyslog_default_file_permissions_configured: true
+# CIS_rule_4.2.1.4
+logging_is_configured: true
+# CIS_rule_4.2.1.5
+# Sending logs are through google stack driver logging agent
+# rsyslog_is_configured_to_send_logs_to_a_remote_log_host: true
+# CIS_rule_4.2.1.6
+remote_rsyslog_messages_are_only_accepted_on_designated_log_hosts: true
+# CIS_4.2.2_Configure_journald
+# CIS_rule_4.2.2.1
+journald_is_configured_to_send_logs_to_rsyslog: true
+# CIS_rule_4.2.2.2
+journald_is_configured_to_compress_large_log_files: true
+# CIS_rule_4.2.2.3
+journald_is_configured_to_write_logfiles_to_persistent_disk: true
+# CIS_rule_4.2.3
+permissions_on_all_logfiles_are_configured: true
+# CIS_rule_4.3
+logrotate_is_configured: true
+
+
+# CIS_Section_5_Access,_Authentication_and_Authorization
+# 5.1_Configure_cron
+# CIS_rule_5.1.1
+cron_daemon_is_enabled_and_running: true
+
+# 5_1_2 to 5_1_7__permissions_on__etc_cron files :
+# taken care by permissions_on_files
+# CIS_rule_5.1.2  permissions_on_etc_crontab_are_configured: true
+# CIS_rule_5.1.3  permissions_on_etc_cron.hourly_are_configured: true
+# CIS_rule_5.1.4  permissions_on_etc_cron.daily_are_configured: true
+# CIS_rule_5.1.5  permissions_on_etc_cron.weekly_are_configured: true
+# CIS_rule_5.1.6  permissions_on_etc_cron.monthly_are_configured: true
+# CIS_rule_5.1.7  permissions_on_etc_cron.d_are_configured: true
+
+# CIS_rule_5.1.8
+cron_is_restricted_to_authorized_users: true
+# added at job restrictions below.
+at_is_restricted_to_authorized_users: true
+
+# CIS_5.2_SSH_Server_Configuration
+# CIS_rule_5.2.1 permissions_on_etc_ssh_sshd_config_are_configured: true
+# taken care by permissions_on_files
+
+# CIS_rule_5.2.2
+# SSH_access_is_limited: false  Controlled in GCP.
+
+# CIS_rule_5.2.3
+permissions_on_ssh_private_host_key_files_are_configured: true
+# CIS_rule_5.2.4
+permissions_on_ssh_public_host_key_files_are_configured: true
+
+# CIS Rules 5.2.5  to 5.2.19 takeen care by below
+ensure_ssh_protocol_is_configured: true
+# CIS_rule_5.2.5 SSH_LogLevel_is_appropriate: true
+# CIS_rule_5.2.6 SSH_X11_forwarding_is_disabled: true
+# CIS_rule_5.2.7 SSH_MaxAuthTries_is_set_to_4_or_less: true
+# CIS_rule_5.2.8 SSH_IgnoreRhosts_is_enabled: true
+# CIS_rule_5.2.9 SSH_HostbasedAuthentication_is_disabled: true
+# CIS_rule_5.2.10 SSH_root_login_is_disabled: true
+# CIS_rule_5.2.11 SSH_PermitEmptyPasswords_is_disabled: true
+# CIS_rule_5.2.12 SSH_PermitUserEnvironment_is_disabled: true
+# CIS_rule_5.2.13 SSH_Idle_Timeout_Interval_is_configured: true
+# CIS_rule_5.2.14 SSH_LoginGraceTime_is_set_to_one_minute_or_less: true
+# CIS_rule_5.2.15 SSH_warning_banner_is_configured: true
+# CIS_rule_5.2.16 SSH_PAM_is_enabled: true
+# CIS_rule_5.2.17 SSH_AllowTcpForwarding_is_disabled: true
+# CIS_rule_5.2.18 SSH_MaxStartups_is_configured: true
+# CIS_rule_5.2.19 SSH_MaxSessions_is_set_to_4_or_less: true
+
+# CIS_rule_5.2.20
+system_wide_crypto_policy_is_not_over_ridden: true
+
+# SELinux policy
+rhelcis_selinux_pol: targeted
+
+# CIS_5.3_Configure_authselect
+# 5.3 Configure Authselect, Do not use authselect if host uses Active Directory
+# Not applicable for landingzone images, and Active Directory is not
+# supported. Default authselect configuration is fine.
+# CIS_rule_5.3.1 Create_custom_authselect_profile: false
+# CIS_rule_5.3.2 Select_authselect_profile: false
+# CIS_rule_5.3.3 authselect_includes_with-faillock: false
+
+# CIS_5.4_Configure_PAM
+# CIS_rule_5.4.1
+password_creation_requirements_are_configured: true
+# CIS_rule_5.4.2
+lockout_for_failed_password_attempts_is_configured: true
+# CIS_rule_5.4.3
+password_reuse_is_limited: true
+# CIS_rule_5.4.4
+password_hashing_algorithm_is_sha_512: true
+# CIS_5.5_User_Accounts_and_Environment
+# CIS_rule_5.5.1 Set_Shadow_Password_Suite_Parameters
+# CIS_rule_5.5.1.1_
+password_expiration_is_365_days_or_less: true
+# CIS_rule_5.5.1.2
+minimum_days_between_password_changes_is_7_or_more: true
+# CIS_rule_5.5.1.3
+password_expiration_warning_days_is_7_or_more: true
+# CIS_rule_5.5.1.4
+inactive_password_lock_is_30_days_or_less: true
+# CIS_rule_5.5.1.5
+all_users_last_password_change_date_is_in_the_past: true
+# CIS_rule_5.5.2
+system_accounts_are_secured: true
+# CIS_rule_5.5.3
+default_user_shell_timeout_is_900_seconds_or_less: true
+# CIS_rule_5.5.4
+default_group_for_the_root_account_is_gid_0: true
+# CIS_rule_5.5.5
+default_user_umask_is_027_or_more_restrictive: true
+
+# CIS_rule_5.6
+root_login_is_restricted_to_system_console: false
+# In GCP serial port can be enabled/disabled
+# and direct login of root via ssh is disabled in sshd_config rule 5.2.10.
+
+# CIS_rule_5.7
+access_to_the_su_command_is_restricted: true
+
+
+# CIS_Section_6_System_Maintenance
+# 6.1_System_File_Permissions
+# 6_1_1 to _6_1_9 file permissions
+# is taken care by permissions_on_files
+# CIS_rule_6.1.1 Audit_system_file_permissions: true
+# CIS_rule_6.1.2 permissions_on_etc_passwd_are_configured: true
+# CIS_rule_6.1.3 permissions_on_etc_passwd-_are_configured: true
+# CIS_rule_6.1.4 permissions_on_etc_shadow_are_configured: true
+# CIS_rule_6.1.5 permissions_on_etc_shadow-_are_configured: true
+# CIS_rule_6.1.6 permissions_on_etc_gshadow_are_configured: true
+# CIS_rule_6.1.7 permissions_on_etc_gshadow-_are_configured: true
+# CIS_rule_6.1.8 permissions_on_etc_group_are_configured: true
+# CIS_rule_6.1.9 permissions_on_etc_group-_are_configured: true
+
+# CIS_rule_6.1.10
+no_world_writable_files_exist: true
+# CIS_rule_6.1.11
+no_unowned_files_or_directories_exist: true
+# CIS_rule_6.1.12_no_ungrouped_files_or_directories_exist
+# CIS_rule_6.1.13
+audit_suid_executables: true
+# CIS_rule_6.1.14_
+audit_sgid_executables: true
+# CIS_6.2_User_and_Group_Settings
+# CIS_rule_6.2.1
+password_fields_are_not_empty: true
+# CIS_rule_6.2.2
+no_legacy_entries_exist_in_etc_passwd: true
+# CIS_rule_6.2.3
+root_path_integrity: true
+# CIS_rule_6.2.4
+no_legacy_entries_exist_in_etc_shadow: true
+# CIS_rule_6.2.5
+no_legacy_entries_exist_in_etc_group: true
+# CIS_rule_6.2.6
+root_is_the_only_uid_0_account: true
+# CIS_rule_6.2.7
+users_home_directories_permissions_are_750_or_more_restrictive: true
+# CIS_rule_6.2.8
+users_own_their_home_directories: false
+# CIS_rule_6.2.9
+users_dot_files_are_not_group_or_world_writable: true
+# CIS_rule_6.2.10
+no_users_have_forward_files: true
+# CIS_rule_6.2.11
+no_users_have_netrc_files: true
+# CIS_rule_6.2.12 no user netrc files should exis.
+# users_netrc_Files_are_not_group_or_world_accessible: false
+# CIS_rule_6.2.13
+no_users_have_rhosts_files: true
+# CIS_rule_6.2.14
+all_groups_in_etc_passwd_exist_in_etc_group: true
+# CIS_rule_6.2.15
+no_duplicate_uids_exist: true
+# CIS_rule_6.2.16
+no_duplicate_gids_exist: true
+# CIS_rule_6.2.17
+no_duplicate_user_names_exist: true
+# CIS_rule_6.2.18
+no_duplicate_group_names_exist: true
+# CIS_rule_6.2.19
+shadow_group_is_empty: true
+# CIS_rule_6.2.20
+all_users_home_directories_exist: false
+
+# Below lists the definitions of common variables and constants used for creating a Linux LZ base golden image
+
+# 1.5.2 Bootloader password
+var_bootloader_password: random
+var_set_boot_pass: false
+
+# 1.5.3 Ensure authentication required for single user mode
+# It is disabled by default as it is setting random password for root.
+# To enable it set: var_root_password: 'newpassword'
+
+# IPv6 required
+var_ipv6_required: true
+
+
+# 5.2.2 - 5.2.19 Ensure SSH Protocol is configured
+base_sshd_config:
+  - {regex: '^Port', value: 'Port 22'}
+  - {regex: '^Protocol', value: 'Protocol 2'}
+  - {regex: '^AddressFamily', value: 'AddressFamily any'}
+  - {regex: '^HostKey /etc/ssh/ssh_host_rsa_key', value: 'HostKey /etc/ssh/ssh_host_rsa_key'}
+  - {regex: '^HostKey /etc/ssh/ssh_host_ecdsa_key', value: 'HostKey /etc/ssh/ssh_host_ecdsa_key'}
+  - {regex: '^HostKey /etc/ssh/ssh_host_ed25519_key', value: 'HostKey /etc/ssh/ssh_host_ed25519_key'}
+  - {regex: '^AuthorizedKeysFile', value: 'AuthorizedKeysFile  .ssh/authorized_keys'}
+  - {regex: '^Ciphers', value: 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr'}
+  - {regex: '^MACs', value: 'MACs hmac-sha2-512,hmac-sha2-256'}
+  - {regex: '^PasswordAuthentication', value: 'PasswordAuthentication yes'}
+  - {regex: '^ChallengeResponseAuthentication', value: 'ChallengeResponseAuthentication no'}
+  - {regex: '^GSSAPIAuthentication', value: 'GSSAPIAuthentication yes'}
+  - {regex: '^GSSAPICleanupCredentials', value: 'GSSAPICleanupCredentials no'}
+  - {regex: '^PrintMotd', value: 'PrintMotd no'}
+  - {regex: '^Subsystem', value: 'Subsystem  sftp  /usr/libexec/openssh/sftp-server'}
+  - {regex: '^SyslogFacility', value: 'SyslogFacility AUTHPRIV'}  # CIS 5.2.5
+  - {regex: '^LogLevel', value: 'LogLevel INFO'}  # CIS 5.2.5
+  - {regex: '^X11Forwarding', value: 'X11Forwarding yes'}  # CIS 5.2.6
+  - {regex: '^MaxAuthTries', value: 'MaxAuthTries 4'}  # CIS 5.2.7
+  - {regex: '^IgnoreRhosts', value: 'IgnoreRhosts yes'}  # CIS 5.2.8
+  - {regex: '^HostbasedAuthentication', value: 'HostbasedAuthentication no'}  # CIS 5.2.9
+  - {regex: '^PermitRootLogin', value: 'PermitRootLogin no'}  # CIS 5.2.10
+  - {regex: '^PermitEmptyPasswords', value: 'PermitEmptyPasswords no'}  # CIS 5.2.11
+  - {regex: '^PermitUserEnvironment', value: 'PermitUserEnvironment no'}  # CIS 5.2.12
+  - {regex: '^ClientAliveInterval', value: 'ClientAliveInterval 900'}  # CIS 5.2.13
+  - {regex: '^ClientAliveCountMax', value: 'ClientAliveCountMax 1'}  # CIS 5.2.13
+  - {regex: '^LoginGraceTime', value: 'LoginGraceTime 1m'}  # CIS 5.2.14
+  - {regex: '^Banner', value: 'Banner /etc/issue.net'}  # CIS 5.2.15
+  - {regex: '^Banner', value: 'Banner /etc/issue'}  # CIS 5.2.15
+  - {regex: '^UsePAM', value: 'UsePAM yes'}  # CIS 5.2.16
+  - {regex: '^AllowTcpForwarding', value: 'AllowTcpForwarding no'}  # CIS 5.2.17
+  - {regex: '^MaxStartups', value: 'MaxStartups 10:30:60'}  # CIS 5.2.18
+  - {regex: '^MaxSessions', value: 'MaxSessions 4'}  # CIS 5.2.19
+
+# auditd.conf constants
+# 4.1.2.1 - 4.1.2.3 Audit log file size and keep log
+max_log_file: 800
+admin_space_left: 50
+action_mail_acct: root
+
+# 2.2.1 Time Synchronization
+# 2.2.1.2 Ensure chrony is configured
+# Ensure below contents is found in /etc/chrony.conf
+base_chrony_content:
+  - {regex: '^driftfile', value: 'driftfile /var/lib/chrony/drift'}
+  - {regex: '^logdir', value: 'logdir /var/log/chrony'}
+  - {regex: '^makestep', value: 'makestep 1.0 3'}
+  - {regex: '^server', value: 'server metadata.google.internal iburst'}
+
+# 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host
+# Stackdriver agent (google-fluentd) to be installed
+agent_type: logging
+agent_package_state: present
+version: latest  # keep latest as its an image creation step
+main_config_file: ''  # use default config
+additional_config_dir: ''  # no additional app config or plugin
+logging_config_path: /etc/google-fluentd/google-fluentd.conf
+logging_plugins_path: /etc/google-fluentd/plugin/
+logging_validation_cmd: '/usr/sbin/google-fluentd -c %s --dry-run'
+
+# 4.1.1.4| Ensure audit_backlog_limit is sufficient
+var_auditd_backlog_limit: "8192"
+
+# Core dump config details
+coredump_storage: external
+coredump_compress: "yes"
+coredump_process_size_max: 2G
+coredump_external_size_max: 2G
+coredump_journal_size_max: 767M
+coredump_max_use: ""
+coredump_keep_free: ""
+
+
+# Time Synchronization
+var_time_synchronization: chrony
+
+# var_time_synchronization_servers:
+#   - uri: "metadata.google.internal"
+#     config: "iburst"
+
+var_pass:
+  max_days: 28
+  min_days: 1
+  warn_age: 14
+  inactive: 90
+  history: 12
+
+rhelcis_passwd_label: "{{ (this_item | default(item)).id }}: {{ (this_item | default(item)).dir }}"
+
+# Starting GID for interactive users
+rhelcis_int_gid: 1000
+
+var_shell_timeout: 900
+
+# Deny access if the number of consecutive authentication failures for this user during the recent interval exceeds
+var_accounts_passwords_pam_faillock_deny: 5
+
+# Do not allow users to reuse recent passwords.
+var_password_pam_unix_remember: 12
+
+# The length of the interval during which the consecutive authentication failures must happen for the user account
+# lock out is n seconds. The default is 900 (15 minutes).
+var_fail_interval: 900
+# The access will be reenabled after n seconds after the lock out. The default is 600 (10 minutes)
+var_unlock_time: 600
+
+var_pwquality:
+  - key: 'minlen'
+    value: '8'
+  - key: 'dcredit'
+    value: '0'
+  - key: 'ucredit'
+    value: '0'
+  - key: 'ocredit'
+    value: '0'
+  - key: 'lcredit'
+    value: '0'
+  - key: 'minclass'
+    value: '3'
+
+var_vartmp:
+  source: /tmp
+  fstype: false
+  opts: "defaults, nodev, nosuid, noexec, bind"
+  enabled: false
+
+# Warning Banner Content (issue, issue.net)
+var_warning_banner: |
+   Warning: This system is restricted to authorized users of
+   your company and should be utilized for business purposes only.
+   Unauthorized access or use is a violation of company policy and the law.
+   This system may be monitored for administrative and security reasons.
+   By proceeding, you acknowledge that (1) you have read and understand
+   this notice, and (2) you consent to the system monitoring.
+
+# End Banner
+
+# auditd.conf constants
+# 4.1.2.1 - 4.1.2.3 Audit log file size and keep log
+var_max_log_file: 800
+var_admin_space_left: 50
+var_action_mail_acct: root
+var_space_left_action: email
+var_admin_space_left_action: SUSPEND
+var_max_log_file_action: keep_logs
+
+# Syslog system
+var_syslog: rsyslog
+# var_syslog: syslog-ng
+
+## Section 5 Vars
+var_at_allow_users: []
+var_cron_allow_users: []
+
+var_logrotate: daily
+
+# The default system-wide cryptographic policy level. It allows the
+# TLS 1.2 and 1.3 protocols, as well as the IKEv2 and SSH2 protocols.
+# The RSA keys and Diffie-Hellman parameters are accepted if they are at least 2048 bits long.
+var_system_crypto_policy: DEFAULT
+# LEGACY ensures maximum compatibility with Red Hat Enterprise Linux 5 and earlier;
+#  it is less secure due to an increased attack surface.
+# var_system_crypto_policy: LEGACY
+# FUTURE is a conservative security level that is believed to withstand any near-term future
+# attacks. This level does not allow the use of SHA-1 in signature algorithms.
+#  The RSA keys and Diffie-Hellman parameters are accepted if they are at least 3072 bits long.
+# var_system_crypto_policy: FUTURE
+# FIPS policy level that conforms with the FIPS 140-2 requirements.
+# This is used internally by the fips-mode-setup tool,
+# which switches the RHEL system into FIPS mode.
+# var_system_crypto_policy: FIPS
+
+var_password_change_date_in_future_action: expire
+
+###### Multi OS Vars ###########
+prelim_check_package_command:
+  RedHat: rpm -q
+  Debian: dpkg -V
+auditd_package:
+  RedHat: audit
+  Debian: auditd
+cron_package:
+  RedHat: cronie
+  Debian: cron
+cron_service:
+  RedHat: crond
+  Debian: cron
+ntp_service:
+  RedHat: ntpd
+  Debian: ntp
+chrony_service:
+  RedHat: chronyd
+  Debian: chrony
+tcp_wrapper_package:
+  RedHat: tcp_wrappers
+  Debian: tcpd
+bashrc_file:
+  RedHat: /etc/bashrc
+  Debian: /etc/bash.bashrc
+tmp_mount_file:
+  RedHat: /usr/lib/systemd/system/tmp.mount
+  Debian: /usr/share/systemd/tmp.mount
+tmp_mount_options:
+  RedHat: mode=1777,strictatime,noexec,nodev,nosuid
+  Debian: mode=1777,strictatime,nodev,nosuid
+chrony_config_file:
+  RedHat: /etc/chrony.conf
+  Debian: /etc/chrony/chrony.conf

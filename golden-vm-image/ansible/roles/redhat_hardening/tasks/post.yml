@@ -1,0 +1,67 @@
+---
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: "Ensure updates, patches, and additional security software are installed"
+  package:
+    name: '*'
+    state: latest
+  when:
+    - updates_patches_and_additional_security_software_are_installed
+
+- name: "Perform  package cleanup"
+  package:
+    autoremove: true
+
+- name: "Reboot the GCP Instance after being hardened"
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 5
+    post_reboot_delay: 300
+    test_command: uptime
+
+# Prepare Instance to generate report
+- name: "Install Perl package"
+  package:
+    name:
+      - perl
+    state: present
+
+- name: "Copy script"
+  copy:
+    src: pci_script.pl
+    dest: /tmp
+    mode: '700'
+
+# Execute & get report
+- name: "Generate the report"
+  command: perl /tmp/pci_script.pl -r
+  register: report
+  changed_when: false
+
+- name: "Delete script"
+  file:
+    path: /tmp/pci_script.pl
+    state: absent
+
+- name: "Ensure updates, patches, and additional security software are installed"
+  package:
+    name: '*'
+    state: latest
+  when:
+    - updates_patches_and_additional_security_software_are_installed
+
+- name: "Perform  package cleanup"
+  package:
+    autoremove: true
+
+- name: "Reboot the GCP Instance after being hardened"
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 5
+    post_reboot_delay: 300
+    test_command: uptime

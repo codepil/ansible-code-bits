@@ -1,0 +1,13 @@
+## N/A - RootDirUrl
+  ## Value 'file://<Share location of CertUpdates' - Use double backslash--- we do not have anything set up here yet, leaving it as is
+rootdirurl: {
+  'gpp.cloud': 'file://\\gpp.cloud\\NETLOGON\\CertUpdates',
+  'gpi.cloud': 'file://\\gpi.cloud\\NETLOGON\\CertUpdates',
+  'gcp_image': 'absent'  # Removes the customized setting and reverts to default URL
+}
+## N/A - EnableDisallowedCertAutoUpdate
+  ## Values 0 (Disabled) ||1 (Enabled)
+enabledisallowedcertautoupdate: 1
+## N/A - DisableRootAutoUpdate
+  ## Values 0 (Disabled) ||1 (Enabled)
+disablerootautoupdate: 1

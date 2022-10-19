@@ -1,0 +1,341 @@
+---
+- name: "Ensure cron daemon is enabled"
+  service:
+      name: cron
+      enabled: true
+  when:
+      - cron_daemon_is_enabled_and_running
+
+# - name: "5.1.2 to 5.1.7 Ensure permissions on cron files."
+# taken care of taken care by permissions_on_files
+
+- name: "Ensure cron is restricted to authorized users"
+  block:
+      - name: "Ensure cron is restricted to authorized users"
+        file:
+            dest: /etc/cron.deny
+            state: absent
+
+      - name: "Ensure cron is restricted to authorized users"
+        template:
+            src: cron.allow.j2
+            dest: /etc/cron.allow
+            owner: root
+            group: root
+            mode: 0600
+  when:
+      - cron_is_restricted_to_authorized_users
+
+- name: "Ensure at is restricted to authorized users"
+  block:
+      - name: "Ensure at is restricted to authorized users"
+        file:
+            dest: /etc/at.deny
+            state: absent
+
+      - name: "Ensure at is restricted to authorized users"
+        template:
+            src: at.allow.j2
+            dest: /etc/at.allow
+            owner: root
+            group: root
+            mode: 0600
+  when:
+      - at_is_restricted_to_authorized_users
+
+- name: "Ensure sudo is installed"
+  apt:
+      name:
+          - sudo
+      state: present
+      install_recommends: false
+  when:
+      - sudo_is_installed
+
+- name: "Ensure sudo commands use pty"
+  lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^Defaults use_pty'
+      line: 'Defaults use_pty'
+      validate: 'visudo -cf %s'
+  when:
+      - sudo_commands_use_pty
+
+- name: "Ensure sudo log file exists"
+  lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^Defaults logfile.*'
+      line: 'Defaults logfile="/var/log/sudo.log"'
+      validate: 'visudo -cf %s'
+  when:
+      - sudo_log_file_exists
+
+# - name: "5.3.1| Ensure permissions on /etc/ssh/sshd_config are configured"
+#  taken care by permissions_on_files
+
+- name: "Ensure permissions on SSH private host key files are configured"
+  block:
+      - name: "Ensure permissions on SSH private host key files are configured | find keys"
+        find:
+            paths: /etc/ssh
+            patterns: "ssh_host_*_key"
+        register: ssh_private_host_keys
+
+      - name: "Ensure permissions on SSH private host key files are configured | change permissions"
+        file:
+            dest: "{{ item.path }}"
+            state: file
+            owner: root
+            group: root
+            mode: 0600
+        with_items: "{{ ssh_private_host_keys.files }}"
+  when:
+      - permissions_on_ssh_private_host_key_files_are_configured
+
+- name: "Ensure permissions on SSH public host key files are configured"
+  block:
+      - name: "Ensure permissions on SSH public host key files are configured | find keys"
+        find:
+            paths: /etc/ssh
+            patterns: "ssh_host_*_key.pub"
+        register: ssh_public_host_keys
+
+      - name: "Ensure permissions on SSH public host key files are configured | change permissions"
+        file:
+            dest: "{{ item.path }}"
+            state: file
+            owner: root
+            group: root
+            mode: 0644
+        with_items: "{{ ssh_public_host_keys.files }}"
+  when:
+      - permissions_on_ssh_public_host_key_files_are_configured
+
+# - name: "5.3.4| Ensure SSH access is limited"
+# Not implemented. Controlled in GCP. Not at OS level via  user list, group list.
+
+# 5.3.5 - 5.3.22 Ensure SSH Protocol is configured
+- name: "Configure /etc/ssh/sshd_config"
+  lineinfile:
+      dest: '/etc/ssh/sshd_config'
+      regexp: "{{ item.regex }}"
+      line: "{{ item.value }}"
+      state: present
+  with_items:
+      - "{{ base_sshd_config }}"
+      - "{{ additional_sshd_config }}"
+  when:
+      - item.regex is defined
+      - ensure_ssh_protocol_is_configured
+
+- name: "Ensure password creation requirements are configured"
+  block:
+      - name: "Ensure lipam-pwquality is installed"
+        apt:
+            name: libpam-pwquality
+            state: present
+            install_recommends: false
+
+      - name: "Ensure password creation requirements are configured"
+        lineinfile:
+            state: present
+            create: true
+            dest: /etc/security/pwquality.conf
+            regexp: '^{{ item.key }}'
+            line: '{{ item.key }} = {{ item.value }}'
+            mode: "644"
+        with_items:
+            - "{{ var_pwquality }}"
+  when:
+      - password_creation_requirements_are_configured
+
+- name: "Ensure lockout for failed password attempts is configured"
+  block:
+      - name: "Ensure lockout for failed password attempts is configured - /etc/pam.d/common-account"
+        lineinfile:
+            dest: /etc/pam.d/common-account
+            line: 'account required pam_tally2.so'
+
+      - name: "Ensure lockout for failed password attempts is configured - /etc/pam.d/common-auth"
+        lineinfile:
+            dest: /etc/pam.d/common-auth
+            # line: 'auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900'
+            line: 'auth required pam_tally2.so onerr=fail audit silent deny=3 unlock_time=900'
+  when:
+      - lockout_for_failed_password_attempts_is_configured
+
+- name: "Ensure password reuse is limited"
+  lineinfile:
+      dest: /etc/pam.d/common-password
+      line: "password required pam_pwhistory.so remember={{ var_pass['history'] }}"
+  when:
+      - password_reuse_is_limited
+
+- name: "Ensure password hashing algorithm is SHA-512"
+  command: authconfig --passalgo=sha512 --update
+  changed_when: false
+  failed_when: false
+  when:
+      - password_hashing_algorithm_is_sha_512
+
+- name: "Ensure minimum days between password changes is configured"
+  lineinfile:
+      state: present
+      dest: /etc/login.defs
+      regexp: '^PASS_MIN_DAYS'
+      line: "PASS_MIN_DAYS {{ var_pass['min_days'] }}"
+  when:
+      - minimum_days_between_password_changes_is_configured
+
+- name: "Ensure password expiration is 365 days or less"
+  lineinfile:
+      state: present
+      dest: /etc/login.defs
+      regexp: '^PASS_MAX_DAYS'
+      line: "PASS_MAX_DAYS {{ var_pass['max_days'] }}"
+  when:
+      - password_expiration_is_365_days_or_less
+
+- name: "Ensure password expiration warning days is 7 or more"
+  lineinfile:
+      state: present
+      dest: /etc/login.defs
+      regexp: '^PASS_WARN_AGE'
+      line: "PASS_WARN_AGE {{ var_pass['warn_age'] }}"
+  when:
+      - password_expiration_warning_days_is_7_or_more
+
+- name: "Ensure inactive password lock is 30 days or less"
+  lineinfile:
+      state: present
+      dest: /etc/default/useradd
+      regexp: '^INACTIVE'
+      line: "INACTIVE={{ var_pass['inactive'] }}"
+  when:
+      - inactive_password_lock_is_30_days_or_less
+
+- name: "Ensure all users last password change date is in the past"
+  block:
+      - name: "Ensure all users last password change date is in the past| lock users"
+        user:
+            name: "{{ item }}"
+            password_lock: yes"
+        loop: "{{ users_password_change_date_in_future.stdout_lines }}"
+        when:
+            - var_password_change_date_in_future_action == 'lock'
+
+      - name: "Ensure all users last password change date is in the past| expire users"
+        user:
+            name: "{{ item }}"
+            expires: 1422403387
+        loop: "{{ users_password_change_date_in_future.stdout_lines }}"
+        when:
+            - var_password_change_date_in_future_action == 'expire'
+  when:
+      - all_users_last_password_change_date_is_in_the_past
+      - users_password_change_date_in_future.stdout_lines | length > 0
+
+- name: "Ensure system accounts are secured"
+  command: >
+    for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do
+     if [ $user != "root" ]; then
+      usermod -L $user
+      if [ $user != "sync" ] && [ $user != "shutdown" ] && [ $user != "halt" ];
+      then
+        usermod -s /usr/sbin/nologin $user
+      fi
+     fi
+    done
+  changed_when: false
+  when:
+      - system_accounts_are_secured
+      - system_accounts_non_login_1.stdout
+      - system_accounts_non_login_2.stdout
+
+- name: "Ensure default group for the root account is GID 0"
+  command: usermod -g 0 root
+  changed_when: false
+  failed_when: false
+  when:
+      - default_group_for_the_root_account_is_gid_0
+
+- name: "Ensure default user umask is 027 or more restrictive"
+  block:
+      - name: "Ensure default user umask is 027 or more restrictive - /etc/bash.bashrc"
+        lineinfile:
+            state: present
+            dest: /etc/bash.bashrc
+            create: true
+            regexp: '^umask '
+            line: 'umask 027'
+            mode: "644"
+
+      - name: "Ensure default user umask is 027 or more restrictive - /etc/profile"
+        lineinfile:
+            state: present
+            dest: /etc/profile
+            create: true
+            regexp: '^umask '
+            line: 'umask 027'
+            mode: "644"
+
+      - name: "Ensure default user umask is 027 or more restrictive - /etc/profile.d/99-umask.sh"
+        lineinfile:
+            state: present
+            dest: /etc/profile.d/99-umask.sh
+            create: true
+            regexp: '^umask '
+            # line: 'umask 027'
+            line: 'umask 077'  #  Custom
+            mode: "644"
+  when:
+      - default_user_umask_is_027_or_more_restrictive
+
+- name: "Ensure default user shell timeout is 900 seconds or less"
+  block:
+      - name: "Ensure default user shell timeout is 900 seconds or less - /etc/bash.bashrc"
+        lineinfile:
+            state: present
+            dest: /etc/bash.bashrc
+            create: true
+            regexp: '^TMOUT='
+            line: "TMOUT={{ var_shell_timeout }}"
+            mode: "644"
+
+      - name: "Ensure default user shell timeout is 900 seconds or less - /etc/profile"
+        lineinfile:
+            state: present
+            dest: /etc/profile
+            create: true
+            regexp: '^TMOUT='
+            line: "TMOUT={{ var_shell_timeout }}"
+            mode: "644"
+
+      - name: "Ensure default user shell timeout is 900 seconds or less - /etc/profile.d/99-tmout.sh"
+        lineinfile:
+            state: present
+            dest: /etc/profile.d/99-tmout.sh
+            create: true
+            regexp: '^TMOUT='
+            line: "TMOUT={{ var_shell_timeout }}"
+            mode: "644"
+  when:
+      - default_user_shell_timeout_is_900_seconds_or_less
+
+- name: "Ensure access to the su command is restricted"
+  lineinfile:
+      state: present
+      dest: /etc/pam.d/su
+      regexp: '^(#)?auth\s+required\s+pam_wheel\.so'
+      line: "auth           required        pam_wheel.so use_uid"
+  when:
+      - access_to_the_su_command_is_restricted
+
+- name: "Ensure access to the su command is restricted - sudo group contains root"
+  user:
+      name: root
+      groups: sudo
+  when:
+      - access_to_the_su_command_is_restricted

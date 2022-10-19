@@ -1,0 +1,636 @@
+---
+# Which sections to run.
+var_section1: true
+var_section2: true
+var_section3: true
+var_section4: true
+var_section5: true
+var_section6: true
+#
+var_custom_section1: true
+
+
+# Section 1 rules
+# CIS 1_1_1
+# 1_1_1 takes care of  1.1.1.1 to 1.1.1.7 except 1.1.1.6
+# 1.1.1.6 squashfs cannot be disable by this method
+# as its inbuilt in kernel now.
+disable_unused_filesystems: true
+# CIS rule 1_1_2
+tmp_is_configured: true
+# CIS rule 1_1_3
+nodev_option_set_on_tmp_partition: true
+# CIS rule 1_1_4
+nosuid_option_set_on_tmp_partition: true
+# CIS rule 1_1_5
+noexec_option_set_on_tmp_partition: false  # Will break apt
+# CIS rule 1_1_6
+dev_shm_is_configured: true
+# CIS rule 1_1_7
+nodev_option_set_on_dev_shm_partition: true
+# CIS rule 1_1_8
+nosuid_option_set_on_dev_shm_partition: true
+# CIS rule 1_1_9
+noexec_option_set_on_dev_shm_partition: true
+# CIS rule 1_1_10
+separate_partition_exists_for_var: false
+# Will require partition of disk. Not usually done in cloud vms.
+# CIS rule 1_1_11
+separate_partition_exists_for_var_tmp: false
+# CIS rule 1_1_12
+var_tmp_partition_includes_the_nodev_option: false
+# CIS rule 1_1_13
+var_tmp_partition_includes_the_nosuid_option: false
+# CIS rule 1_1_14
+var_tmp_partition_includes_the_noexec_option: false
+# CIS rule 1_1_15
+separate_partition_exists_for_var_log: false
+# CIS rule 1_1_16
+separate_partition_exists_for_var_log_audit: false
+# CIS rule 1_1_17
+separate_partition_exists_for__home: false
+# CIS rule 1_1_18
+home_partition_includes_the_nodev_option: false
+# CIS rule 1_1_19 # No media in cloud vms.
+nodev_option_set_on_removable_media_partitions: false
+# CIS rule 1_1_20
+nosuid_option_set_on_removable_media_partitions: false
+# CIS rule 1_1_21
+noexec_option_set_on_removable_media_partitions: false
+# CIS rule 1_1_22
+sticky_bit_is_set_on_all_world_writable_directories: true
+# CIS rule 1_1_23
+disable_automounting: true
+# 1_1_24_disable_usb_storage  taken care in 1_1_1
+# CIS rule 1_2_1
+package_manager_repositories_are_configured: false
+# Regular patching method needs to be decided and used.
+# CIS rule 1_2_2
+gpg_keys_are_configured: false
+# GPG_keys depends on patching source to protect against spoofing.
+# CIS rule 1_3_1
+aide_is_installed: false  # Other software would be installed
+# CIS rule 1_3_2
+filesystem_integrity_is_regularly_checked: false
+# CIS rule 1_4_1
+permissions_on_bootloader_config_are_not_overridden: true
+# CIS rule 1_4_2
+bootloader_password_is_set: false
+# Set permissions on various files as per various rules of CIS
+permissions_on_files: true
+# 1_4_3_permissions_on_bootloader_config_are_configured:
+# taken care by permissions_on_files
+# CIS rule 1_4_4
+authentication_required_for_single_user_mode: false
+# CIS rule 1_5_1
+xd_nx_support_is_enabled: true
+# CIS rule 1_5_2
+address_space_layout_randomization_aslr_is_enabled: true
+# CIS rule 1_5_3
+prelink_is_not_installed: true
+# CIS rule 1_5_4
+core_dumps_are_restricted: true
+# CIS rule 1_6_1_1
+apparmor_is_installed: false
+# Other software to be used instead of AppArmor
+# CIS rule 1_6_1_2
+apparmor_is_enabled_in_the_bootloader_configuration: false
+# CIS rule 1_6_1_3
+all_aparmor_profiles_are_in_enforce_or_complain_mode: false
+# CIS rule 1_6_1_4
+all_apparmor_profiles_are_enforcing: false
+# CIS rule 1_7_1
+message_of_the_day_is_configured_properly: true
+# CIS rule 1_7_2
+local_login_warning_banner_is_configured_properly: true
+# CIS rule 1_7_3
+remote_login_warning_banner_is_configured_properly: true
+# CIS rule 1_7_4
+permissions_on__etc_motd_are_configured: true
+# 1_7_5 /etc/issue, 1_7_6 /etc/issue.net
+# taken care by permissions_on_files
+# CIS rule 1_8_1
+gnome_display_manager_is_removed: true
+# CIS rule 1_8_2 gdm_login_banner_is_configured: false
+# CIS rule 1_8_3
+disable_user_list_is_enabled: true
+# CIS rule 1_8_4
+xdcmp_is_not_enabled: false
+# CIS rule 1_9
+updates_patches_and_additional_security_software_are_installed: true
+
+# https://bugs.launchpad.net/ubuntu/+source/google-guest-agent/+bug/1938299
+# below is temp workaround till ubuntu bug effecting GCE images are not fixed.
+ubuntu_bug_1938299_not_yet_fixed: true
+
+
+# Section 2 rules
+
+# CIS rule 2_1_1_1
+time_synchronization_is_in_use: true
+# CIS rule 2_1_1_2
+systemd_timesyncd_is_configured: false
+# CIS rule 2_1_1_3
+chrony_is_configured: true
+# CIS rule 2_1_1_4
+ntp_is_configured: false
+# CIS rule 2_1_2
+window_system_is_not_installed: true
+# CIS rule 2_1_3_to_2_1_14_to_2_2_14
+disable_remove_unwanted_services: true
+# CIS rule 2_1_15
+mail_transfer_agent_is_configured_for_local_only_mode: true
+# CIS rule 2_1_16
+rsync_service_is_not_installed: true
+# CIS rule 2_1_17
+nis_server_is_not_installed: true
+# CIS rule 2_2_1
+nis_client_is_not_installed: true
+# CIS rule 2_2_2
+rsh_client_is_not_installed: true
+# CIS rule 2_2_3
+talk_client_is_not_installed: true
+# CIS rule 2_2_4
+telnet_client_is_not_installed: true
+# CIS rule 2_2_5
+ldap_client_is_not_installed: true
+# CIS rule 2_2_6
+rpc_is_not_installed: true
+# CIS rule 2_3
+nonessential_services_are_removed_or_masked: true
+
+# Section 3 rules
+
+# CIS rule 3_1_1
+disable_ipv6: true
+# CIS rule 3_1_2
+wireless_interfaces_are_disabled: true
+# CIS rule 3_2_1
+packet_redirect_sending_is_disabled: true
+# CIS rule 3_2_2
+ip_forwarding_is_disabled: true
+# CIS rule 3_3_1
+source_routed_packets_are_not_accepted: true
+# CIS rule 3_3_2
+icmp_redirects_are_not_accepted: true
+# CIS rule 3_3_3
+secure_icmp_redirects_are_not_accepted: true
+# CIS rule 3_3_4
+suspicious_packets_are_logged: true
+# CIS rule 3_3_5
+broadcast_icmp_requests_are_ignored: true
+# CIS rule 3_3_6
+bogus_icmp_responses_are_ignored: true
+# CIS rule 3_3_7
+reverse_path_filtering_is_enabled: true
+# CIS rule 3_3_8
+tcp_syn_cookies_is_enabled: true
+# CIS rule 3_3_9
+ipv6_router_advertisements_are_not_accepted: true
+# 3_4_1 to 3.4.4_DCCP,SCTP,RDS, TIPC is_disabled taken care in 1_1_1
+# CIS rule 3_5
+firewall_configuration: true    # This removes all OS firewall
+# as in GCP OS firewalls will not be used.
+# 3_5_1_1 to 3_5_3_3_4  not required as OS firewall is not in use.
+# GCP firewall will be used.
+
+# Section 4 rules
+
+# CIS rule 4_1_1_1
+auditd_is_installed: true
+# CIS rule 4_1_1_2
+auditd_service_is_enabled: true
+# CIS rule 4_1_1_3
+auditing_for_processes_that_start_prior_to_auditd_is_enabled: true
+# CIS rule 4_1_1_4
+audit_backlog_limit_is_sufficient: true
+# CIS rule 4_1_2_1_to_4_1_2_3
+audit_log_file_size_and_keep_log: true
+
+# CIS rule 4_1_3_to_17
+audit_events_collected: true
+# Above creates auditable events through
+# /etc/audit/rules.d/30-pci-ds3-audit.rules
+
+# CIS rule 4_2_1_1
+rsyslog_is_installed: true
+# CIS rule 4_2_1_2
+rsyslog_service_is_enabled: true
+# CIS rule 4_2_1_3
+logging_is_configured: true
+# CIS rule 4_2_1_4
+rsyslog_default_file_permissions_configured: true
+# CIS rule 4_2_1_5
+rsyslog_is_configured_to_send_logs_to_a_remote_log_host: false
+# CIS rule 4_2_1_6
+remote_rsyslog_accepted_on_designated_log_hosts: true
+# CIS rule 4_2_2_1
+journald_is_configured_to_send_logs_to_rsyslog: true
+# CIS rule 4_2_2_2
+journald_is_configured_to_compress_large_log_files: true
+# CIS rule 4_2_2_3
+journald_is_configured_to_write_to_persistent_disk: true
+# CIS rule 4_2_3
+permissions_on_all_logfiles_are_configured: true
+# CIS rule 4_3
+logrotate_is_configured: true
+# CIS rule 4_4
+logrotate_assigns_appropriate_permissions: true
+
+# Section 5 rules
+
+# CIS rule 5_1_1
+cron_daemon_is_enabled_and_running: true
+# 5_1_2 to 5_1_7__permissions_on__etc_cron files :
+# taken care by permissions_on_files
+
+# CIS rule 5_1_8
+cron_is_restricted_to_authorized_users: true
+# CIS rule 5_1_9
+at_is_restricted_to_authorized_users: true
+# CIS rule 5_2_1
+sudo_is_installed: true
+# CIS rule 5_2_2
+sudo_commands_use_pty: true
+# CIS rule 5_2_3
+sudo_log_file_exists: true
+# 5_3_1_permissions_on__etc_ssh_sshd_config_are_configured:
+# taken care by permissions_on_files
+# CIS rule 5_3_2
+permissions_on_ssh_private_host_key_files_are_configured: true
+# CIS rule 5_3_3
+permissions_on_ssh_public_host_key_files_are_configured: true
+# CIS rule 5_3_4
+# SSH_access_is_limited: false  Controlled in GCP.
+
+# CIS rule 5_3_5_to_5_3_22
+ensure_ssh_protocol_is_configured: true
+
+# CIS rule 5_3_5
+ssh_loglevel_is_appropriate: true
+# CIS rule 5_3_6
+ssh_x11_forwarding_is_disabled: true
+# CIS rule 5_3_7
+ssh_maxauthtries_is_set_to_4_or_less: true
+# CIS rule 5_3_8
+ssh_ignorerhosts_is_enabled: true
+# CIS rule 5_3_9
+ssh_hostbasedauthentication_is_disabled: true
+# CIS rule 5_3_10
+ssh_root_login_is_disabled: true
+# CIS rule 5_3_11
+ssh_permitemptypasswords_is_disabled: true
+# CIS rule 5_3_12
+ssh_permituserenvironment_is_disabled: true
+# CIS rule 5_3_13
+only_strong_ciphers_are_used: true
+# CIS rule 5_3_14
+only_strong_mac_algorithms_are_used: true
+# CIS rule 5_3_15
+only_strong_key_exchange_algorithms_are_used: true
+# CIS rule 5_3_16
+ssh_idle_timeout_interval_is_configured: true
+# CIS rule 5_3_17
+ssh_logingracetime_is_set_to_one_minute_or_less: true
+# CIS rule 5_3_18
+ssh_warning_banner_is_configured: true
+# CIS rule 5_3_19
+ssh_pam_is_enabled: true
+# CIS rule 5_3_20
+ssh_allowtcpforwarding_is_disabled: true
+# CIS rule 5_3_21
+ssh_maxstartups_is_configured: true
+# CIS rule 5_3_22
+ssh_masessions_is_limited: true
+
+# CIS rule 5_4_1
+password_creation_requirements_are_configured: true
+# CIS rule 5_4_2
+lockout_for_failed_password_attempts_is_configured: true
+# CIS rule 5_4_3
+password_reuse_is_limited: true
+# CIS rule 5_4_4
+password_hashing_algorithm_is_sha_512: true
+# CIS rule 5_5_1_1
+minimum_days_between_password_changes_is_configured: true
+# CIS rule 5_5_1_2
+password_expiration_is_365_days_or_less: true
+# CIS rule 5_5_1_3
+password_expiration_warning_days_is_7_or_more: true
+# CIS rule 5_5_1_4
+inactive_password_lock_is_30_days_or_less: true
+# CIS rule 5_5_1_5
+all_users_last_password_change_date_is_in_the_past: true
+# CIS rule 5_5_2
+system_accounts_are_secured: true
+# CIS rule 5_5_3
+default_group_for_the_root_account_is_gid_0: true
+# CIS rule 5_5_4
+default_user_umask_is_027_or_more_restrictive: true
+# CIS rule 5_5_5
+default_user_shell_timeout_is_900_seconds_or_less: true
+# 5_6_root_login_is_restricted_to_system_console: false
+# In GCP serial port can be enabled/disabled
+# and direct login of root via ssh is disabled in sshd_config rule 5.3.10.
+# CIS rule 5_7
+access_to_the_su_command_is_restricted: true
+
+# Section 6 rules
+# 6_1_1 to _6_1_9 file permissions
+# is taken care by permissions_on_files
+
+# CIS rule 6_1_10
+no_world_writable_files_exist: true
+# CIS rule 6_1_11
+no_unowned_files_or_directories_exist: true
+# CIS rule 6_1_12
+no_ungrouped_files_or_directories_exist: true
+
+# CIS rule 6_1_13
+audit_suid_executables: false
+# CIS rule 6_1_14
+audit_sgid_executables: false
+# CIS rule 6_2_1
+accounts_in__etc_passwd_use_shadowed_passwords: false
+# CIS rule 6_2_2
+password_fields_are_not_empty: true
+# CIS rule 6_2_3
+all_groups_in__etc_passwd_exist_in__etc_group: false
+# CIS rule 6_2_4
+all_users_home_directories_exist: false
+# CIS rule 6_2_5
+users_own_their_home_directories: false
+# CIS rule 6_2_6
+users_home_directories_permissions_are_750_or_more_restrictive: true
+# CIS rule 6_2_7
+users_dot_files_are_not_group_or_world_writable: false
+# CIS rule 6_2_8
+no_users_have__netrc_files: true
+# CIS rule 6_2_9
+no_users_have__forward_files: true
+# CIS rule 6_2_10
+no_users_have__rhosts_files: true
+# CIS rule 6_2_11
+root_is_the_only_uid_0_account: true
+# CIS rule 6_2_12
+root_pah_integrity: true
+# CIS rule 6_2_13
+no_duplicate_uids_exist: false
+# CIS rule 6_2_14
+no_duplicate_gids_exist: false
+# CIS rule 6_2_15
+no_duplicate_user_names_exist: false
+# CIS rule 6_2_16
+no_duplicate_group_names_exist: false
+# CIS rule 6_2_17
+shadow_group_is_empty: false
+
+
+# 1.4.2 Bootloader password
+var_bootloader_password: random
+var_set_boot_pass: false
+
+# 1.4.4 Ensure authentication required for single user mode
+# It is disabled by default as it is setting random password for root.
+# To enable it set: var_root_password: 'newpassword'
+
+# IPv6 required
+var_ipv6_required: true
+
+# AIDE not in use
+var_config_aide: false
+# AIDE cron settings
+var_aide_cron:
+  cron_user: root
+  cron_file: /etc/crontab
+  aide_job: '/usr/bin/aide.wrapper --config /etc/aide/aide.conf --check'
+  aide_minute: 0
+  aide_hour: 5
+  aide_day: '*'
+  aide_month: '*'
+  aide_weekday: '*'
+
+disable_services:
+  # 2.1.3| Ensure Avahi Server is not installed.
+  - {service_name: avahi, package_name: avahi-daemon}
+  # 2.1.4| Ensure CUPS  is not installed.
+  - {service_name: cups, package_name: cups}
+  # 2.1.5| Ensure DHCP Server  is not installed.
+  - {service_name: dhcpd, package_name: dhcpd}
+  # 2.1.6| Ensure LDAP server is not enabled.
+  - {service_name: slapd, package_name: slapd}
+  # 2.1.7| Ensure NFS is not installed.
+  - {service_name: nfs, package_name: nfs}
+  # 2.1.8| Ensure DNS Server  is not installed.
+  - {service_name: rpcbind, package_name: rpcbind}
+  - {service_name: named, package_name: named}
+  # 2.1.9| Ensure FTP Server  is not installed.
+  - {service_name: vsftpd, package_name: vsftpd}
+  # 2.1.10| Ensure HTTP server  is not installed.
+  - {service_name: httpd, package_name: apache2}
+  # 2.1.11| Ensure IMAP and POP3 server is not installed.
+  - {service_name: dovecot, package_name: dovecot}
+  # 2.1.12| Ensure Samba is not installed.
+  - {service_name: smb, package_name: smb}
+  # 2.1.13| Ensure HTTP Proxy Server is not installed.
+  - {service_name: squid, package_name: squid}
+  # 2.1.14| Ensure SNMP Server is not installed.
+  - {service_name: snmpd, package_name: snmpd}
+
+# Prefix string to be used to identify X11 packages
+x11_package_prefix:
+  - {package_name: "xorg"}
+  - {package_name: "x11*"}
+  - {package_name: "xserver-xorg*"}
+
+# Required file permissions
+var_file_permissions:
+  - {name: /boot/grub/grub.cfg, mode: "u-wx,go-rwx"}   # 1.4.3
+  - {name: /etc/issue, mode: "u-x,go-wx"}   # 1.7.5
+  - {name: /etc/issue.net, mode: "u-x,go-wx"}    # 1.7.6
+  - {name: /etc/passwd, mode: "u-x,go-wx"}   # 6.1.2
+  - {name: /etc/passwd-, mode: "u-x,go-wx"}   # 6.1.3
+  - {name: /etc/group, mode: "u-x,go-wx"}   # 6.1.4
+  - {name: /etc/group-, mode: "u-x,go-wx"}   # 6.1.5
+  - {name: /etc/shadow, mode: "u-x,g-wx,o-rwx"}   # 6.1.6
+  - {name: /etc/shadow-, mode: "u-x,g-wx,o-rwx"}   # 6.1.7
+  - {name: /etc/gshadow, mode: "u-x,g-wx,o-rwx"}   # 6.1.8
+  - {name: /etc/gshadow-, mode: "u-x,g-wx,o-rwx"}   # 6.1.9
+  - {name: /etc/ssh/sshd_config, mode: "og-rwxx"}   # 5.3.1
+  - {name: /etc/crontab, mode: "og-rwx"}   # 5.1.2
+  - {name: /etc/cron.hourly/, mode: "og-rwx"}   # 5.1.3
+  - {name: /etc/cron.daily/, mode: "og-rwx"}   # 5.1.4
+  - {name: /etc/cron.weekly/, mode: "og-rwx"}   # 5.1.5
+  - {name: /etc/cron.monthly/, mode: "og-rwx"}   # 5.1.6
+  - {name: /etc/cron.d/, mode: "og-rwx"}   # 5.1.7
+  - {name: /etc/update-motd.d/90-updates-available, mode: "-x"}   # Disable motd
+  - {name: /etc/update-motd.d/91-release-upgrade, mode: "-x"}   # Disable motd
+  - {name: /etc/update-motd.d/50-motd-news, mode: "-x"}   # Disable motd
+
+
+# Time Synchronization
+var_time_synchronization: chrony
+
+var_time_synchronization_servers:
+  - uri: "metadata.google.internal"
+    config: "iburst"
+
+var_firewall: none  # In GCP we are not using OS firewall
+
+# Warning Banner Content (issue, issue.net)
+var_warning_banner: |
+   Warning: This system is restricted to authorized users of
+   your company and should be utilized for business purposes only.
+   Unauthorized access or use is a violation of company policy and the law.
+   This system may be monitored for administrative and security reasons.
+   By proceeding, you acknowledge that (1) you have read and understand
+   this notice, and (2) you consent to the system monitoring.
+
+# End Banner
+
+# auditd.conf constants
+# 4.1.2.1 - 4.1.2.3 Audit log file size and keep log
+var_max_log_file: 800
+var_admin_space_left: 50
+var_action_mail_acct: root
+var_space_left_action: email
+var_admin_space_left_action: SUSPEND
+var_max_log_file_action: keep_logs
+
+# 4.1.1.4| Ensure audit_backlog_limit is sufficient
+var_auditd_backlog_limit: "8192"
+
+var_logrotate: "daily"
+
+## Section 5 Vars
+var_at_allow_users: []
+var_cron_allow_users: []
+
+
+# SSH Server Configuration
+# Both IAP and OSLogin are expected to function
+# 5.3.5 - 5.3.19 Ensure SSH Protocol is configured
+base_sshd_config:
+  - {regex: '^Port', value: 'Port 22'}
+  - {regex: '^Protocol', value: 'Protocol 2'}
+  - {regex: '^LogLevel', value: 'LogLevel INFO'}    # CIS 5.3.5
+  - {regex: '^X11Forwarding', value: 'X11Forwarding yes'}    # CIS 5.3.6
+  - {regex: '^MaxAuthTries', value: 'MaxAuthTries 4'}    # CIS 5.3.7
+  - {regex: '^IgnoreRhosts', value: 'IgnoreRhosts yes'}    # CIS 5.3.8
+  - {regex: '^HostbasedAuthentication', value: 'HostbasedAuthentication no'}   # CIS 5.3.9
+  - {regex: '^PermitRootLogin', value: 'PermitRootLogin no'}    # CIS 5.3.10
+  - {regex: '^PermitEmptyPasswords', value: 'PermitEmptyPasswords no'}   # CIS 5.3.11
+  - {regex: '^PermitUserEnvironment', value: 'PermitUserEnvironment no'}   # CIS 5.3.12
+  - {regex: '^Ciphers', value: 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr'}   #  Custom CIS 5.3.13
+  - {regex: '^MACs', value: 'MACs hmac-sha2-512,hmac-sha2-256'}     #  Custom CIS 5.3.14
+  #  - {regex: '^kexalgorithms', value: "kexalgorithms curve25519-sha256,\
+  #  curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,\
+  #  diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,\
+  #  ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,\
+  #  diffie-hellman-group-exchange-sha256"}    # CIS 5.3.15
+  - {regex: '^ClientAliveInterval', value: 'clientAliveInterval 900'}   # CIS 5.3.16
+  - {regex: '^ClientAliveCountMax', value: 'ClientAliveCountMax 1'}   # CIS 5.3.16
+  - {regex: '^LoginGraceTime', value: 'LoginGraceTime 1m'}    # CIS 5.3.17
+  - {regex: '^Banner', value: 'Banner /etc/issue.net'}    # CIS 5.3.18
+  - {regex: '^UsePAM', value: 'UsePAM yes'}    # CIS 5.3.19
+  - {regex: '^AllowTcpForwarding', value: 'AllowTcpForwarding no'}    # CIS 5.3.20
+  - {regex: '^MaxStartups', value: 'MaxStartups 10:30:60'}    # CIS 5.3.21
+  - {regex: '^MaxSessions', value: 'MaxSessions 4'}    # CIS 5.3.22
+  - {regex: '^AddressFamily', value: 'AddressFamily any'}
+  - {regex: '^HostKey /etc/ssh/ssh_host_rsa_key', value: 'HostKey /etc/ssh/ssh_host_rsa_key'}
+  - {regex: '^HostKey /etc/ssh/ssh_host_ecdsa_key', value: 'HostKey /etc/ssh/ssh_host_ecdsa_key'}
+  - {regex: '^HostKey /etc/ssh/ssh_host_ed25519_key', value: 'HostKey /etc/ssh/ssh_host_ed25519_key'}
+  - {regex: '^AuthorizedKeysFile', value: 'AuthorizedKeysFile  .ssh/authorized_keys'}
+  - {regex: '^PasswordAuthentication', value: 'PasswordAuthentication yes'}
+  - {regex: '^ChallengeResponseAuthentication', value: 'ChallengeResponseAuthentication no'}
+  - {regex: '^GSSAPIAuthentication', value: 'GSSAPIAuthentication yes'}
+  - {regex: '^GSSAPICleanupCredentials', value: 'GSSAPICleanupCredentials no'}
+  - {regex: '^PrintMotd', value: 'PrintMotd no'}
+  - {regex: '^Subsystem', value: 'Subsystem  sftp  /usr/lib/openssh/sftp-server'}
+  - {regex: '^SyslogFacility', value: 'SyslogFacility AUTHPRIV'}
+
+
+# no config to add or modify from the base_sshd_config
+additional_sshd_config:
+
+var_pwquality:   #  Custom
+  - key: 'minlen'
+    value: '8'
+  - key: 'dcredit'
+    value: '0'
+  - key: 'ucredit'
+    value: '0'
+  - key: 'ocredit'
+    value: '0'
+  - key: 'lcredit'
+    value: '0'
+  - key: 'minclass'
+    value: '3'
+
+var_pass:    #  Custom
+  max_days: 28
+  min_days: 1
+  warn_age: 14
+  inactive: 90
+  history: 12
+
+var_password_change_date_in_future_action: expire    # lock
+
+var_shell_timeout: 900
+# Syslog system
+var_syslog: rsyslog
+# var_syslog: syslog-ng
+
+var_vartmp:
+  source: /tmp
+  fstype: false
+  opts: "defaults, nodev, nosuid, noexec, bind"
+  enabled: false
+
+# Apply upgrades (set to false if another patching system is in place)
+var_apply_upgrades: true
+
+# Core dump config details
+coredump_storage: external
+coredump_compress: "yes"
+coredump_process_size_max: 2G
+coredump_external_size_max: 2G
+coredump_journal_size_max: 767M
+coredump_max_use: ""
+coredump_keep_free: ""
+
+
+###### Multi OS Vars ###########
+prelim_check_package_command:
+  RedHat: rpm -q
+  Debian: dpkg -V
+auditd_package:
+  RedHat: audit
+  Debian: auditd
+cron_package:
+  RedHat: cronie
+  Debian: cron
+cron_service:
+  RedHat: crond
+  Debian: cron
+ntp_service:
+  RedHat: ntpd
+  Debian: ntp
+chrony_service:
+  RedHat: chronyd
+  Debian: chrony
+tcp_wrapper_package:
+  RedHat: tcp_wrappers
+  Debian: tcpd
+bashrc_file:
+  RedHat: /etc/bashrc
+  Debian: /etc/bash.bashrc
+tmp_mount_file:
+  RedHat: /usr/lib/systemd/system/tmp.mount
+  Debian: /usr/share/systemd/tmp.mount
+tmp_mount_options:
+  RedHat: mode=1777,strictatime,noexec,nodev,nosuid
+  Debian: mode=1777,strictatime,nodev,nosuid
+chrony_config_file:
+  RedHat: /etc/chrony.conf
+  Debian: /etc/chrony/chrony.conf

@@ -1,0 +1,103 @@
+---
+## 17.X Detailed Security Audit Policy
+## Values are 'Success', 'Failure', 'Success and Failure', 'No Auditing'
+## When adding a policy the hash key must match a value returned as a fact.
+audit_policy_subcategories:
+  ## 17.1.1 - Audit Policy: Account Logon: Credential Validation
+  - subcategory: 'Credential Validation'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Kerberos Service Ticket Operations'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Kerberos Authentication Service'
+    audit_type: 'Success, Failure'
+  ## 17.2.6 - Audit Policy: Account Management: Audit User Account Management
+  - subcategory: 'User Account Management'
+    audit_type: 'Success, Failure'
+  ## 17.3.2 - Audit Policy: Detailed Tracking: Process Creation
+  - subcategory: 'Process Creation'
+    audit_type: 'Success'
+  - subcategory: 'Process Termination'
+    audit_type: 'Success'
+  - subcategory: 'DPAPI Activity'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Plug and Play Events'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Token Right Adjusted Events'
+    audit_type: 'Success'
+  ## 17.5.1 - Audit Policy: Logon-Logoff: Account Lockout
+  - subcategory: 'Account Lockout'
+    audit_type: 'Failure'
+  ## 17.5.3 - Audit Policy: Logon-Logoff: Logoff
+  - subcategory: 'Logoff'
+    audit_type: 'Success'
+  ## 17.5.4 - Audit Policy: Logon-Logoff: Logon
+  - subcategory: 'Logon'
+    audit_type: 'Success, Failure'
+  ## 17.5.5 - Audit Policy: Logon-Logoff: Other Logon/Logoff Events
+  - subcategory: 'Other Logon/Logoff Events'
+    audit_type: 'Success, Failure'
+  ## 17.5.6 - Audit Policy: Logon-Logoff: Special Logon
+  - subcategory: 'Special Logon'
+    audit_type: 'Success'
+  - subcategory: 'IPsec Quick Mode'
+    audit_type: 'Success'
+  - subcategory: 'Network Policy server'
+    audit_type: 'Success'
+  ## N/A - File System
+  - subcategory: 'File System'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Kernel Object'
+    audit_type: 'Success, Failure'
+  - subcategory: 'SAM'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Certification Services'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Handle Manipulation'
+    audit_type: 'Success'
+  - subcategory: 'File Share'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Filtering Platform Packet Drop'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Filtering Platform Connection'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Other Object Access Events'
+    audit_type: 'Success, Failure'
+  ## N/A - Audit Registry
+  - subcategory: 'Registry'
+    audit_type: 'Success, Failure'
+  ## 17.6.1 - Audit Policy: Object Access: Removable Storage
+  - subcategory: 'Removable Storage'
+    audit_type: 'Success, Failure'
+  ## 17.7.1 - Audit Policy: Policy Change: Audit Policy Change
+  - subcategory: 'Audit Policy Change'
+    audit_type: 'Success'
+  ## 17.7.2 - Audit Policy: Policy Change: Authentication Policy Change
+  - subcategory: 'Authentication Policy Change'
+    audit_type: 'Success'
+  - subcategory: 'MPSSVC Rule-Level Policy Change'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Filtering Platform Policy Change'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Other Policy Change Events'
+    audit_type: 'Success, Failure'
+  ## 17.8.1 - Audit Policy: Privilege Use: Sensitive Privilege Use---EDIT was named 'non sensitive use'
+  - subcategory: 'Non Sensitive Privilege Use'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Other Privilege Use Events'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Sensitive Privilege Use'
+    audit_type: 'Success, Failure'
+  - subcategory: 'Security System Extension'
+    audit_type: 'Success'
+  ## 17.9.1 - Audit Policy: System: IPsec Driver
+  - subcategory: 'IPsec Driver'
+    audit_type: 'Success, Failure'
+  ## 17.9.2 - Audit Policy: System: Other System Events
+  - subcategory: 'Other System Events'
+    audit_type: 'Success, Failure'
+  ## 17.9.3 - Audit Policy: System: Security State Change
+  - subcategory: 'Security State Change'
+    audit_type: 'Success'
+  ## 17.9.5 - Audit Policy: System: System Integrity
+  - subcategory: 'System Integrity'
+    audit_type: 'Success'

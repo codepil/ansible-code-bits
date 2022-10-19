@@ -1,0 +1,9 @@
+## NTP variables
+ntp_server: {
+  'gcp_image': '169.254.169.254,0x9'
+}
+
+#  https://docs.microsoft.com/en-us/previous-versions/windows/embedded/ms912391(v=winembedded.11)?redirectedfrom=MSDN
+ntp_timezone: {
+  'gcp_image': 'Dateline Standard Time'
+}

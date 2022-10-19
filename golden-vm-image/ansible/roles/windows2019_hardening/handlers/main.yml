@@ -1,0 +1,15 @@
+---
+# Disable local firewalls
+# Tags: firewall
+- name: Disable local firewall
+  win_firewall:
+    state: disabled
+    profiles: "{{ item }}"
+  loop: "{{ firewall_profiles }}"
+  tags:
+    - firewall
+
+- name: Reboot Windows Machine
+  ansible.windows.win_reboot:
+    reboot_timeout: 360
+    msg: "Reboot initiated by Ansible"

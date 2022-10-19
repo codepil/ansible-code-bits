@@ -1,0 +1,454 @@
+---
+- name: "Ensure cron daemon is enabled"
+  service:
+      name: "{{ cron_service[ansible_os_family] }}"
+      enabled: true
+  when:
+      - cron_daemon_is_enabled_and_running
+
+- name: Find all cron job files
+  find:
+      paths: /etc
+      patterns: "cron*"
+  register: file_search
+
+- name: Change permission on all cron jobs
+  file:
+      path: '{{ item.path }}'
+      mode: og-rwx
+  with_items: "{{ file_search.files }}"
+
+- name: "Ensure cron is restricted to authorized users"
+  block:
+      - name: "Ensure cron is restricted. Create cron.deny file."
+        file:
+            dest: /etc/cron.deny
+            state: absent
+
+      - name: "Ensure cron is restricted. Create cron.allow file."
+        template:
+            src: cron.allow.j2
+            dest: /etc/cron.allow
+            owner: root
+            group: root
+            mode: 0600
+  when:
+      - cron_is_restricted_to_authorized_users
+
+- name: "Ensure at is restricted to authorized users"
+  block:
+      - name: "Ensure at is restricted. Create at.deny file."
+        file:
+            dest: /etc/at.deny
+            state: absent
+
+      - name: "Ensure at is restricted. Create at.allow file."
+        template:
+            src: at.allow.j2
+            dest: /etc/at.allow
+            owner: root
+            group: root
+            mode: 0600
+  when:
+      - at_is_restricted_to_authorized_users
+
+- name: "Ensure permissions on SSH private host key files are configured"
+  block:
+      - name: "Ensure permissions on SSH private host key files are configured | find keys"
+        find:
+            paths: /etc/ssh
+            patterns: "ssh_host_*_key"
+        register: ssh_private_host_keys
+
+      - name: "Ensure permissions on SSH private host key files are configured | change permissions"
+        file:
+            dest: "{{ item.path }}"
+            state: file
+            owner: root
+            group: root
+            mode: 0600
+        with_items: "{{ ssh_private_host_keys.files }}"
+  when:
+      - permissions_on_ssh_private_host_key_files_are_configured
+
+- name: "Ensure permissions on SSH public host key files are configured"
+  block:
+      - name: "Ensure permissions on SSH public host key files are configured | find keys"
+        find:
+            paths: /etc/ssh
+            patterns: "ssh_host_*_key.pub"
+        register: ssh_public_host_keys
+
+      - name: "Ensure permissions on SSH public host key files are configured | change permissions"
+        file:
+            dest: "{{ item.path }}"
+            state: file
+            owner: root
+            group: root
+            mode: 0644
+        with_items: "{{ ssh_public_host_keys.files }}"
+  when:
+      - permissions_on_ssh_public_host_key_files_are_configured
+
+- name: "Configure /etc/ssh/sshd_config"
+  lineinfile:
+      dest: '/etc/ssh/sshd_config'
+      regexp: "{{ item.regex }}"
+      line: "{{ item.value }}"
+      state: present
+  with_items:
+      - "{{ base_sshd_config }}"
+      - "{{ additional_sshd_config }}"
+  when:
+      - ensure_ssh_protocol_is_configured
+
+- name: "Configure SSH to use System Crypto Policy"
+  lineinfile:
+      dest: /etc/sysconfig/sshd
+      state: absent
+      regexp: ^\s*CRYPTO_POLICY.*$
+  when:
+      - system_wide_crypto_policy_is_not_over_ridden
+
+- name: Restart sshd
+  service:
+      name: sshd.service
+      state: restarted
+
+- name: "Ensure password creation requirements are configured"
+  block:
+      - name: "Ensure password creation requirements are configured in pwquality.conf"
+        lineinfile:
+            state: present
+            create: true
+            dest: /etc/security/pwquality.conf
+            regexp: '^{{ item.key }}'
+            line: '{{ item.key }} = {{ item.value }}'
+            mode: "644"
+        with_items:
+            - "{{ var_pwquality }}"
+        when:
+            - password_creation_requirements_are_configured
+      - name: Configure password settings at /etc/pam.d/
+        lineinfile:
+            path: "/etc/pam.d/{{ item }}"
+            backrefs: true
+            state: present
+            regexp: '^(password\s*requisite\s*pam_pwquality\.so.*authtok_type=)$'
+            line: '\1 minlen=8 minclass=3 dcredit=0 ucredit=0 ocredit=0 lcredit=0'
+        loop:
+            - password-auth
+            - system-auth
+  when:
+      - password_creation_requirements_are_configured
+
+- name: "Ensure lockout for failed password attempts is configured"
+  block:
+      - name: "Add auth pam faillock preauth deny before pam unix.so"
+        pamd:
+            name: '{{ item }}'
+            type: auth
+            control: sufficient
+            module_path: pam_unix.so
+            new_type: auth
+            new_control: required
+            new_module_path: pam_faillock.so
+            module_arguments: "preauth silent deny={{ var_accounts_passwords_pam_faillock_deny }}
+            unlock_time= {{ var_unlock_time }} fail_interval={{ var_fail_interval }}"
+            state: before
+        loop:
+            - system-auth
+            - password-auth
+
+      - name: "Add deny argument to auth pam faillock preauth"
+        pamd:
+            name: '{{ item }}'
+            type: auth
+            control: required
+            module_path: pam_faillock.so
+            module_arguments: "preauth silent deny={{ var_accounts_passwords_pam_faillock_deny }}
+             unlock_time= {{ var_unlock_time }} fail_interval={{ var_fail_interval }}"
+            state: args_present
+        loop:
+            - system-auth
+            - password-auth
+
+      - name: "Add auth pam_faillock authfail deny after pam unix.so"
+        pamd:
+            name: '{{ item }}'
+            type: auth
+            control: sufficient
+            module_path: pam_unix.so
+            new_type: auth
+            new_control: '[default=die]'
+            new_module_path: pam_faillock.so
+            module_arguments: "authfail deny={{ var_accounts_passwords_pam_faillock_deny }}
+             unlock_time={{ var_unlock_time }} fail_interval={{ var_fail_interval }}"
+            state: after
+        loop:
+            - system-auth
+            - password-auth
+
+      - name: "Add deny argument to auth pam faillock authfail"
+        pamd:
+            name: '{{ item }}'
+            type: auth
+            new_type: auth
+            control: '[default=die]'
+            module_path: pam_faillock.so
+            module_arguments: "authfail deny={{ var_accounts_passwords_pam_faillock_deny }}
+             unlock_time={{ var_unlock_time }} fail_interval={{ var_fail_interval }}"
+            state: args_present
+        loop:
+            - system-auth
+            - password-auth
+
+      - name: "Add account pam_faillock before pam unix.so"
+        pamd:
+            name: '{{ item }}'
+            type: account
+            control: required
+            module_path: pam_unix.so
+            new_type: account
+            new_control: required
+            new_module_path: pam_faillock.so
+            state: before
+        loop:
+            - system-auth
+            - password-auth
+  when:
+      - lockout_for_failed_password_attempts_is_configured
+
+- name: "Do not allow users to reuse recent passwords"
+  pamd:
+      name: '{{ item }}'
+      type: password
+      new_type: password
+      control: sufficient
+      module_path: pam_unix.so
+      module_arguments: remember={{ var_password_pam_unix_remember }}
+      state: args_present
+  loop:
+      - system-auth
+      - password-auth
+  when:
+      - password_reuse_is_limited
+
+- name: Set Password Hashing Algorithm in /etc/libuser.conf
+  lineinfile:
+      dest: /etc/libuser.conf
+      insertafter: ^\s*\[defaults]
+      regexp: ^#?crypt_style
+      line: crypt_style = sha512
+      state: present
+      create: true
+      mode: u-x,go-xw
+  when:
+      - '"libuser" in ansible_facts.packages'
+      - password_hashing_algorithm_is_sha_512
+
+- name: "Ensure minimum days between password changes is configured"
+  lineinfile:
+      state: present
+      dest: /etc/login.defs
+      regexp: '^PASS_MIN_DAYS'
+      line: "PASS_MIN_DAYS {{ var_pass['min_days'] }}"
+  when:
+      - minimum_days_between_password_changes_is_7_or_more
+
+- name: "Ensure password expiration is 365 days or less"
+  lineinfile:
+      state: present
+      dest: /etc/login.defs
+      regexp: '^PASS_MAX_DAYS'
+      line: "PASS_MAX_DAYS {{ var_pass['max_days'] }}"
+  when:
+      - password_expiration_is_365_days_or_less
+
+- name: "Ensure password expiration warning days is 7 or more"
+  lineinfile:
+      state: present
+      dest: /etc/login.defs
+      regexp: '^PASS_WARN_AGE'
+      line: "PASS_WARN_AGE {{ var_pass['warn_age'] }}"
+  when:
+      - password_expiration_warning_days_is_7_or_more
+
+- name: "Ensure inactive password lock is 30 days or less"
+  lineinfile:
+      state: present
+      dest: /etc/default/useradd
+      regexp: '^INACTIVE'
+      line: "INACTIVE={{ var_pass['inactive'] }}"
+  when:
+      - inactive_password_lock_is_30_days_or_less
+
+- name: "Ensure all users last password change date is in the past"
+  block:
+      - name: "Ensure all users last password change date is in the past| lock users"
+        user:
+            name: "{{ item }}"
+            password_lock: yes"
+        loop: "{{ users_password_change_date_in_future.stdout_lines }}"
+        when:
+            - var_password_change_date_in_future_action == 'lock'
+
+      - name: "Ensure all users last password change date is in the past| expire users"
+        user:
+            name: "{{ item }}"
+            expires: 1422403387
+        loop: "{{ users_password_change_date_in_future.stdout_lines }}"
+        when:
+            - var_password_change_date_in_future_action == 'expire'
+  when:
+      - all_users_last_password_change_date_is_in_the_past
+      - users_password_change_date_in_future.stdout_lines | length > 0
+
+- name: "5.5.2 | L1 | PATCH | Ensure system accounts are secured"
+  block:
+      - name: "Ensure system accounts are secured | Set nologin"
+        user:
+            name: "{{ item.id }}"
+            shell: /usr/sbin/nologin
+        with_items:
+            - "{{ rhelcis_passwd }}"
+        when:
+            - item.id != "root"
+            - item.id != "sync"
+            - item.id != "shutdown"
+            - item.id != "halt"
+            - item.gid < rhelcis_int_gid
+            - item.shell != "      /bin/false"
+            - item.shell != "      /usr/sbin/nologin"
+
+      - name: "Ensure system accounts are secured | Lock accounts"
+        user:
+            name: "{{ item.id }}"
+            password_lock: true
+        with_items:
+            - "{{ rhelcis_passwd }}"
+        when:
+            - item.id != "halt"
+            - item.id != "shutdown"
+            - item.id != "sync"
+            - item.id != "root"
+            - item.gid < rhelcis_int_gid
+            - item.shell != "      /bin/false"
+            - item.shell != "      /usr/sbin/nologin"
+  when:
+      - system_accounts_are_secured
+
+- name: "Ensure default group for the root account is GID 0"
+  command: usermod -g 0 root
+  changed_when: false
+  failed_when: false
+  when:
+      - default_group_for_the_root_account_is_gid_0
+
+- name: "Ensure default user umask is 027 or more restrictive"
+  block:
+      - name: "Ensure default user umask is 027 or more restrictive - /etc/bash.bashrc"
+        lineinfile:
+            state: present
+            dest: /etc/bash.bashrc
+            create: true
+            regexp: '^umask '
+            line: 'umask 027'
+            mode: "644"
+
+      - name: "Ensure default user umask is 027 or more restrictive - /etc/profile"
+        lineinfile:
+            state: present
+            dest: /etc/profile
+            create: true
+            regexp: '^umask '
+            line: 'umask 027'
+            mode: "644"
+
+      - name: "Ensure default user umask is 027 or more restrictive - /etc/profile.d/99-umask.sh"
+        lineinfile:
+            state: present
+            dest: /etc/profile.d/99-umask.sh
+            create: true
+            regexp: '^umask '
+            # line: 'umask 027'
+            line: 'umask 077'
+            mode: "644"
+  when:
+      - default_user_umask_is_027_or_more_restrictive
+
+# this will just display the list of consoles. GCP side needs to confirm the allowed consoles are correct and change if needed.
+- name: "Ensure root login is restricted to system console"
+  block:
+      - name: "Ensure root login is restricted to system console | Check if securetty file exists"
+        stat:
+            path: /etc/securetty
+        register: rhelcis_securetty_check
+
+      - name: " Ensure root login is restricted to system console | Capture consoles"
+        command: cat /etc/securetty
+        changed_when: false
+        register: rhel_5_6_audit
+        when: rhelcis_securetty_check.stat.exists
+
+      - name: "|Ensure root login is restricted to system console | Display Console"
+        debug:
+            msg:
+                - "These are the consoles with root login access, please review:"
+                - "{{ rhel_5_6_audit.stdout_lines }}"
+        when: rhelcis_securetty_check.stat.exists
+
+      - name: "Ensure root login is restricted to system console | Display that no securetty file exists"
+        debug:
+            msg:
+                - "There is no /etc/securetty file, this has been removed by default in RHEL"
+        when: not rhelcis_securetty_check.stat.exists
+  when:
+      - root_login_is_restricted_to_system_console
+
+- name: "Ensure default user shell timeout is 900 seconds or less"
+  block:
+      - name: "Ensure default user shell timeout is 900 seconds or less - /etc/bash.bashrc"
+        lineinfile:
+            state: present
+            dest: /etc/bash.bashrc
+            create: true
+            regexp: '^TMOUT='
+            line: "TMOUT={{ var_shell_timeout }}"
+            mode: "644"
+
+      - name: "Ensure default user shell timeout is 900 seconds or less - /etc/profile"
+        lineinfile:
+            state: present
+            dest: /etc/profile
+            create: true
+            regexp: '^TMOUT='
+            line: "TMOUT={{ var_shell_timeout }}"
+            mode: "644"
+
+      - name: "Ensure default user shell timeout is 900 seconds or less - /etc/profile.d/99-tmout.sh"
+        lineinfile:
+            state: present
+            dest: /etc/profile.d/99-tmout.sh
+            create: true
+            regexp: '^TMOUT='
+            line: "TMOUT={{ var_shell_timeout }}; export TMOUT"
+            mode: "644"
+  when:
+      - default_user_shell_timeout_is_900_seconds_or_less
+
+- name: "Ensure access to the su command is restricted"
+  lineinfile:
+      state: present
+      dest: /etc/pam.d/su
+      regexp: '^(#)?auth\s+required\s+pam_wheel\.so'
+      line: "auth           required        pam_wheel.so use_uid"
+  when:
+      - access_to_the_su_command_is_restricted
+
+- name: "Update users of wheel group"
+  user:
+      name: root
+      groups: wheel
+  when:
+      - access_to_the_su_command_is_restricted

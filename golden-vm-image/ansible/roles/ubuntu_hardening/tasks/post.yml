@@ -1,0 +1,92 @@
+---
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: "POST | Find removed but configured apt packages"
+  shell: "set -o pipefail;
+      dpkg --list | (grep ^rc || true) | tr -s ' ' | cut -d ' ' -f 2"
+  args:
+      executable: /bin/bash
+  register: apt_rc_packages
+  changed_when: false
+
+- name: "POST | Perform apt package cleanup"
+  apt:
+      name: "{{ apt_rc_packages.stdout_lines }}"
+      state: absent
+      purge: true
+  changed_when: false
+  failed_when: false
+  when: not ansible_check_mode
+
+# - name: "Check if a reboot is needed on Ubuntu/Debian based servers"
+#   register: reboot_required_file
+#   stat: path=/var/run/reboot-required get_md5=no
+
+- name: "Reboot the GCP Instance being hardened"
+  reboot:
+      msg: "Reboot initiated by Ansible"
+      connect_timeout: 5
+      reboot_timeout: 300
+      pre_reboot_delay: 5
+      post_reboot_delay: 300
+      test_command: uptime
+
+# Prepare Instance to generate report
+- name: "Install Perl package"
+  package:
+      name:
+          - perl
+      state: present
+
+- name: "Copy script"
+  copy:
+      src: pci_script.pl
+      dest: /tmp
+      mode: '700'
+
+
+# Execute & get report
+- name: "Generate the report"
+  command: perl /tmp/pci_script.pl -r
+  register: report
+  changed_when: false
+
+- name: "Delete script"
+  file:
+      path: /tmp/pci_script.pl
+      state: absent
+
+- name: "Ensure updates, patches, and additional security software are installed"
+  apt:
+      upgrade: dist
+      update_cache: true
+  when:
+      - updates_patches_and_additional_security_software_are_installed
+
+- name: Remove useless packages from the cache
+  apt:
+      autoclean: true
+
+- name: Remove dependencies that are no longer required
+  apt:
+      autoremove: true
+
+- name: "Fix for bug 1938299. Unable to SSH Into Instance when deploying"
+  template:
+      src: "etc/Ubuntu-bug-1938299-disable-network.cfg"
+      dest: /etc/cloud/cloud.cfg.d/99-disable-network-activation.cfg
+      owner: root
+      group: root
+      mode: 0644
+  when:
+      - ubuntu_bug_1938299_not_yet_fixed
+
+- name: "Reboot the GCP Instance being hardened"
+  reboot:
+      msg: "Reboot initiated by Ansible"
+      connect_timeout: 5
+      reboot_timeout: 300
+      pre_reboot_delay: 5
+      post_reboot_delay: 300
+      test_command: uptime

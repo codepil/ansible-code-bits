@@ -1,0 +1,1477 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/win_regedit_module.html
+
+- name: Block Microsoft accounts (2.3.1.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\HardenedPaths\policies\system
+    name: noConnectedUser
+    data: "{{ accounts_block_microsoft_accounts }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Limit Blank Password use to console only (2.3.1.4)
+  win_regedit:
+    path: HKLM:\System\CurrentControlSet\Control\Lsa
+    name: LimitBlankPasswordUse
+    data: "{{ accounts_limit_local_account_use_of_blank_passwords_to_console_logon_only }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: audit:force audit policy subcategory settings (2.3.2.1)
+  win_regedit:
+    path: HKLM:\System\CurrentControlSet\Control\Lsa
+    name: SCENoApplyLegacyAudit
+    data: "{{ audit_force_audit_policy_subcategory_settings_windows_vista_or_later_to_override_audit_policy_category_settings }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: audit:shut down system is unable to log security events (2.3.2.2)
+  win_regedit:
+    path: HKLM:\System\CurrentControlSet\Control\Lsa
+    name: CrashOnAuditFail
+    data: "{{ audit_shut_down_system_immediately_if_unable_to_log_security_audits }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Devices allowed to format and eject media (2.3.4.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+    name: AllocateDASD
+    data: "{{ devices_allowed_to_format_and_eject_removable_media }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: Prevent users from installing print drivers (2.3.4.2)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Print\Providers\LanMan Print Services\Servers
+    name: AddPrinterDrivers
+    data: "{{ devices_prevent_users_from_installing_printer_drivers }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: digitally encrypt or sign secure channel data always (2.3.6.1)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters
+    name: RequireSignOrSeal
+    data: "{{ domain_member_digitally_encrypt_or_sign_secure_channel_data_always }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: digitally encrypt or sign secure channel data when possible (2.3.6.2)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters
+    name: SealSecureChannel
+    data: "{{ domain_member_digitally_encrypt_secure_channel_data_when_possible }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: digitally sign secure channel data when possible (2.3.6.3)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters
+    name: SignSecureChannel
+    data: "{{ domain_member_digitally_sign_secure_channel_data_when_possible }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: disable machine account password changes (2.3.6.4)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters
+    name: DisablePasswordChange
+    data: "{{ domain_member_disable_machine_account_password_changes }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Domain member Maximum machine account password age (2.3.6.5)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters
+    name: MaximumPasswordAge
+    data: "{{ domain_member_maximum_machine_account_password_age }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: require strong session key (2.3.6.6)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters
+    name: RequireStrongKey
+    data: "{{ domain_member_require_strong_windows_2000_or_later_session_key }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not require Control Alt Delete (2.3.7.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: DisableCAD
+    data: "{{ interactive_logon_do_not_require_ctrl_alt_del }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not display last user name (2.3.7.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: DontDisplayLastUserName
+    data: "{{ interactive_logon_do_not_display_last_user_name }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Machine inactivity limit (2.3.7.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: InactivityTimeoutSecs
+    data: "{{ interactive_logon_machine_inactivity_limit }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Message text for users attempting to log in (2.3.7.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: LegalNoticeText
+    data: "{{ interactive_logon_message_text_for_users_attempting_to_log_on }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: Message title for users attempting to log in (2.3.7.5)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: LegalNoticeCaption
+    data: "{{ interactive_logon_message_title_for_users_attempting_to_log_on }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: Number of previous logons to cache (2.3.7.6)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+    name: CachedLogonsCount
+    data: "{{ interactive_logon_number_of_previous_logons_to_cache_in_case_domain_controller_is_not_available }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: Prompt User to change password before expiration (2.3.7.7)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+    name: PasswordExpiryWarning
+    data: "{{ interactive_logon_prompt_user_to_change_password_before_expiration }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Require Domain Controller authentication to unlock workstation (2.3.7.8)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+    name: ForceUnlockLogon
+    data: "{{ interactive_logon_require_domain_controller_authentication_to_unlock_workstation[execution_type] }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Smart card removal behavior (2.3.7.9)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+    name: ScRemoveOption
+    data: "{{ interactive_logon_require_smart_card }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Digitally sign communications always (2.3.8.1)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters
+    name: RequireSecuritySignature
+    data: "{{ microsoft_network_client_digitally_sign_communications_always }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Digitally sign communications if server agrees (2.3.8.2)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters
+    name: EnableSecuritySignature
+    data: "{{ microsoft_network_client_digitally_sign_communications_if_server_agrees }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Send unencrypted password to third party smb servers (2.3.8.3)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters
+    name: EnablePlainTextPassword
+    data: "{{ microsoft_network_client_send_unencrypted_password_to_third_party_smb_servers }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Amount of idle time before suspending session (2.3.9.1)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+    name: AutoDisconnect
+    data: "{{ microsoft_network_server_amount_of_idle_time_required_before_suspending_session }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Digitally sign communications Always (2.3.9.2)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+    name: RequireSecuritySignature
+    data: "{{ microsoft_network_server_digitally_sign_communications_always }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Digitally sign communications if client agrees (2.3.9.3)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+    name: EnableSecuritySignature
+    data: "{{ microsoft_network_server_digitally_sign_communications_if_client_agrees }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Disconnect clients when logon hours expire (2.3.9.4)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+    name: enableforcedlogoff
+    data: "{{ microsoft_network_server_disconnect_clients_when_logon_hours_expire }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Server SPN target name validation level (2.3.9.5)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+    name: SMBServerNameHardeningLevel
+    data: "{{ microsoft_network_server_server_spn_target_name_validation_level }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not allow anonymous enumeration of SAM accounts (2.3.10.2)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: RestrictAnonymousSAM
+    data: "{{ network_access_do_not_allow_anonymous_enumeration_of_sam_accounts }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not allow anonymous enumeration of SAM accounts and shares (2.3.10.3)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: RestrictAnonymous
+    data: "{{ network_access_do_not_allow_anonymous_enumeration_of_sam_accounts_and_shares }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Let Everyone permissions apply to anonymous users (2.3.10.5)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: EveryoneIncludesAnonymous
+    data: "{{ network_access_let_everyone_permissions_apply_to_anonymous_users }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Named pipes can be access anonymously (2.3.10.7)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+    name: NullSessionPipes
+    data: "{{ network_access_named_pipes_that_can_be_accessed_anonymously }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: remotely accessible registry paths (2.3.10.8)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\SecurePipeServers\Winreg\AllowedExactPaths
+    name: Machine
+    data: "{{ network_access_remotely_accessible_registry_paths }}"
+    type: MultiString
+  tags:
+    - misc
+    - registry
+
+- name: remotely accessible registry paths and subpaths (2.3.10.9)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\SecurePipeServers\Winreg\AllowedPaths
+    name: Machine
+    data: "{{ network_access_remotely_accessible_registry_paths_and_subpaths }}"
+    type: MultiString
+  tags:
+    - misc
+    - registry
+
+- name: Restrict anonymous access to named pipes and shares (2.3.10.10)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+    name: RestrictNullSessAccess
+    data: "{{ network_access_restrict_anonymous_access_to_named_pipes_and_shares }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Network shares that can be accessed anonymously (2.3.10.12)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+    name: NullSessionShares
+    data: "{{ network_access_shares_that_can_be_accessed_anonymously }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: Sharing and security model for local accounts (2.3.10.13)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: ForceGuest
+    data: "{{ network_access_sharing_and_security_model_for_local_accounts }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow local system to use computer identity for NTLM (2.3.11.1)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: UseMachineId
+    data: "{{ network_security_allow_local_system_to_use_computer_identity_for_ntlm }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow local system Null session fallback (2.3.11.2)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0
+    name: AllowNullSessionFallback
+    data: "{{ network_security_allow_localsystem_null_session_fallback }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow PKU2U authentication requests to this computer (2.3.11.3)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\pku2u
+    name: AllowOnlineID
+    data: "{{ network_security_allow_pku2u_authentication_requests_to_this_computer_to_use_online_identities }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Configure encryption types allowed for kerberos (2.3.11.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters
+    name: SupportedEncryptionTypes
+    data: "{{ network_security_configure_encryption_types_allowed_for_kerberos }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not store LAN manager hash value on next password change (2.3.11.5)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: NoLMHash
+    data: "{{ network_security_do_not_store_lan_manager_hash_value_on_next_password_change }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: LAN Manager authentication level (2.3.11.7)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa
+    name: LmCompatibilityLevel
+    data: "{{ network_security_lan_manager_authentication_level }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: LDAP client signing requirements (2.3.11.8)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LDAP
+    name: LDAPClientIntegrity
+    data: "{{ network_security_ldap_client_signing_requirements }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Minimum session security for NTLM SSP Based client (2.3.11.9)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0
+    name: NTLMMinClientSec
+    data: "{{ network_security_minimum_session_security_for_ntlm_ssp_based_including_secure_rpc_clients }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Minimum session security for NTLM SSP Based servers (2.3.11.10)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0
+    name: NTLMMinServerSec
+    data: "{{ network_security_minimum_session_security_for_ntlm_ssp_based_including_secure_rpc_servers }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow system to be shut down without having to log on (2.3.13.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: ShutdownWithoutLogon
+    data: "{{ shutdown_allow_system_to_be_shut_down_without_having_to_log_on }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Require case insensitivity for non windows subsystems (2.3.15.1)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel
+    name: ObCaseInsensitive
+    data: "{{ system_objects_require_case_insensitivity_for_non_windows_subsystems }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Strengthen default permissions of internal system objects (2.3.15.2)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager
+    name: ProtectionMode
+    data: "{{ system_objects_strengthen_default_permissions_of_internal_system_objects_eg_symbolic_links }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Admin Approval Mode for the Built-in Administrator account (2.3.17.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: FilterAdministratorToken
+    data: "{{ user_account_control_admin_approval_mode_for_the_built_in_administrator_account[execution_type] }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Behavior of the elevation prompt for administrators in Admin Approval Mode (2.3.17.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: ConsentPromptBehaviorAdmin
+    data: "{{ user_account_control_behavior_of_the_elevation_prompt_for_administrators_in_admin_approval_mode }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Behavior of the elevation prompt for standard users (2.3.17.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: ConsentPromptBehaviorUser
+    data: "{{ user_account_control_behavior_of_the_elevation_prompt_for_standard_users }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Detect application installations and prompt for elevation (2.3.17.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: EnableInstallerDetection
+    data: "{{ user_account_control_detect_application_installations_and_prompt_for_elevation }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Only elevate UIAccess applications that are installed in secure locations (2.3.17.5)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: EnableSecureUIAPaths
+    data: "{{ user_account_control_only_elevate_uiaccess_applications_that_are_installed_in_secure_locations }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Run all administrators in Admin Approval Mode (2.3.17.6)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: EnableLUA
+    data: "{{ user_account_control_run_all_administrators_in_admin_approval_mode }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Switch to the secure desktop when prompting for elevation (2.3.17.7)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: PromptOnSecureDesktop
+    data: "{{ user_account_control_switch_to_the_secure_desktop_when_prompting_for_elevation }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Virtualize file and registry write failures to per-user locations (2.3.17.8)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: EnableVirtualization
+    data: "{{ user_account_control_virtualize_file_and_registry_write_failures_to_per_user_locations }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Apply UAC restrictions to local accounts on network logons (18.3.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: LocalAccountTokenFilterPolicy
+    data: "{{ LocalAccountTokenFilterPolicy }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Configure SMB v1 server (18.3.3)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+    name: SMB1
+    data: "{{ SMB1 }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Enable Structured Exception Handling Overwrite Protection (SEHOP) (18.3.4)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel
+    name: DisableExceptionChainValidation
+    data: "{{ DisableExceptionChainValidation }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: NetBT NodeType configuration (18.3.6)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters
+    name: NodeType
+    data: "{{ NodeType }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: SCM Ensure 'WDigest Authentication' is set (18.3.7)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest
+    name: UseLogonCredential
+    data: "{{ wdigest_authentication_is_set }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Enable Automatic Logon  (18.4.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+    name: AutoAdminLogon
+    data: "{{ mss_auto_admin_logon }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: IP source routing protection level  (18.4.3)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+    name: DisableIPSourceRouting
+    data: "{{ mss_disable_ip_source_routing }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow ICMP redirects to override OSPF generated routes  (18.4.4)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+    name: EnableICMPRedirect
+    data: "{{ mss_enable_icmp_redirect }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: How often keep-alive packets are sent in milliseconds  (18.4.5)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+    name: KeepAliveTime
+    data: "{{ mss_keepalives }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow the computer to ignore NetBIOS name release requests except from WINS servers  (18.4.6)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters
+    name: NoNameReleaseOnDemand
+    data: "{{ mss_no_name_release_on_demand }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow IRDP to detect and configure Default Gateway addresses  (18.4.7)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+    name: Perform RouterDiscovery
+    data: "{{ mss_perform_router_discovery }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Enable Safe DLL search mode (18.4.8)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager
+    name: SafeDllSearchMode
+    data: "{{ mss_safe_dll_search_mode }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Time before screen saver grace period expires (18.4.9)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+    name: ScreenSaverGracePeriod
+    data: "{{ mss_screen_saver_grace_period }}"
+    type: String
+  tags:
+    - misc
+    - registry
+
+- name: How many times unacknowledged data is retransmitted IPv6 (18.4.10)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\TCPIP6\Parameters
+    name: TcpMaxDataRetransmissions
+    data: "{{ mss_tcp_max_data_retransmissions_ipv6 }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: How many times unacknowledged data is retransmitted (18.4.11)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\TCPIP\Parameters
+    name: TcpMaxDataRetransmissions
+    data: "{{ mss_tcp_max_data_retransmissions }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Percentage threshold for the security event log at which the system will generate a warning (18.4.12)
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security
+    name: WarningLevel
+    data: "{{ mss_warning_level }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off multicast name resolution (18.5.4.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient
+    name: EnableMulticast
+    data: "{{ EnableMulticast }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Hardened UNC Paths (18.5.14.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths
+    name: \\*\NETLOGON
+    data: "{{ hardened_unc_paths_netlogon }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: Harden UNC Paths sysvol (18.5.14.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths
+    name: \\*\SYSVOL
+    data: "{{ hardened_unc_paths_sysvol }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: Turn off notifications network usage (18.7.1.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications
+    name: NoCloudApplicationNotification
+    data: "{{ NoCloudApplicationNotification }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Registry policy processing (18.8.21.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}
+    name: NoBackgroundPolicy
+    data: "{{ system_registry_policy_processing }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Configure registry policy processing (18.8.21.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}
+    name: NoGPOListChanges
+    data: "{{ NoGPOListChanges }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Continue experiences on this device (18.8.21.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: EnableCdp
+    data: "{{ EnableCdp }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off background refresh of Group Policy (18.8.21.5)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: DisableBkGndGroupPolicy
+    data: "{{ DisableBkGndGroupPolicy }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Turn off downloading of print drivers over HTTP (18.8.22.1.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers
+    name: DisableWebPnPDownload
+    data: "{{ system_turn_off_downloading_of_print_drivers_over_http }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off handwriting personalization data sharing (18.8.22.1.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\TabletPC
+    name: PreventHandwritingDataSharing
+    data: "{{ PreventHandwritingDataSharing }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off handwriting recognition error reporting (18.8.22.1.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\HandwritingErrorReports
+    name: PreventHandwritingErrorReports
+    data: "{{ PreventHandwritingErrorReports }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off Internet Connection Wizard (18.8.22.1.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\\Internet Connection Wizard
+    name: ExitOnMSICW
+    data: "{{ ExitOnMSICW }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Turn off Internet download for Web publishing and online ordering wizards (18.8.22.1.5)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+    name: NoWebServices
+    data: "{{ system_turn_off_internet_download_for_web_publishing_and_online_ordering_wizards }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Turn off printing over HTTP (18.8.22.1.6)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers
+    name: DisableHTTPPrinting
+    data: "{{ system_turn_off_printing_over_http }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Turn off Search Companion content file updates (18.8.22.1.8)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\SearchCompanion
+    name: DisableContentFileUpdates
+    data: "{{ system_turn_off_search_companion_content_file_updates }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off the Order Prints (18.8.22.1.9)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+    name: NoOnlinePrintsWizard
+    data: "{{ NoOnlinePrintsWizard }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Turn off the "Publish to Web" task for files and folders (18.8.22.1.10)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+    name: NoPublishingWizard
+    data: "{{ system_turn_off_the_publish_to_web_task_for_files_and_folders }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Turn off the Windows Messenger Customer Experience Improvement Program (18.8.22.1.11)
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\Messenger\Client
+    name: CEIP
+    data: "{{ system_turn_off_the_windows_messenger_customer_experience_improvement_program }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Turn off the Customer Experience Improvement Program (18.8.22.1.12)
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\SQMClient\Windows
+    name: CEIPEnable
+    data: "{{ system_turn_off_the_customer_experience_improvement_program }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off Windows Error Reporting (18.8.22.1.13)
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\PCHealth\ErrorReporting
+    name: DoReport
+    data: "{{ DoReport }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Support device authentication using certificate (18.8.25.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters
+    name: DevicePKInitEnable
+    data: "{{ DevicePKInitEnable }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Enumeration policy for external devices incompatible with Kernel DMA Protection (18.8.26.1)
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\Windows\Kernel DMA Protection
+    name: DevicePKInitEnable
+    data: "{{ DevicePKInitEnable }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Disallow copying of user input methods to the system account for sign-in (18.8.27.1)
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\Control Panel\International
+    name: BlockUserInputMethodsForSignIn
+    data: "{{ BlockUserInputMethodsForSignIn }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Block user from showing account details on sign-in (18.8.28.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: BlockUserFromShowingAccountDetailsOnSignin
+    data: "{{ BlockUserFromShowingAccountDetailsOnSignin }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not display network selection UI (18.8.28.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: DontDisplayNetworkSelectionUI
+    data: "{{ DontDisplayNetworkSelectionUI }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not enumerate connected users on domain joined computers (18.8.28.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: DontEnumerateConnectedUsers
+    data: "{{ DontEnumerateConnectedUsers }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Enumerate local users on domain-joined computers (18.8.28.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: EnumerateLocalUsers
+    data: "{{ EnumerateLocalUsers }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off app notifications on the lock screen (18.8.28.5)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: DisableLockScreenAppNotifications
+    data: "{{ DisableLockScreenAppNotifications }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off picture password sign-in (18.8.28.6)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: BlockDomainPicturePassword
+    data: "{{ BlockDomainPicturePassword }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn on convenience PIN sign-in (18.8.28.7)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: AllowDomainPINLogon
+    data: "{{ AllowDomainPINLogon }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow Clipboard synchronization across devices (18.8.31.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: AllowCrossDeviceClipboard
+    data: "{{ AllowCrossDeviceClipboard }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow upload of User Activities (18.8.31.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\System
+    name: UploadUserActivities
+    data: "{{ UploadUserActivities }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Offer Remote Assistance (18.8.36.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: fAllowUnsolicited
+    data: "{{ system_offer_remote_assistance }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: System Solicited Remote Assistance (18.8.36.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: fAllowToGetHelp
+    data: "{{ system_solicited_remote_assistance }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Enable RPC Endpoint Mapper Client Authentication (18.8.37.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\RPC
+    name: EnableAuthEpResolution
+    data: "{{ EnableAuthEpResolution }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Restrict Unauthenticated RPC clients (18.8.37.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\RPC
+    name: RestrictRemoteClients
+    data: "{{ RestrictRemoteClients }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Disallow Autoplay for non-volume devices (18.9.8.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+    name: NoAutoplayfornonVolume
+    data: "{{ NoAutoplayfornonVolume }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Set the default behavior for AutoRun (18.9.8.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+    name: NoAutorun
+    data: "{{ NoAutorun }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Windows Components Turn off Autoplay (18.9.8.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+    name: NoDriveTypeAutoRun
+    data: "{{ windows_components_turn_off_autoplay }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow use of camera (18.9.12.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Camera
+    name: AllowCamera
+    data: "{{ Allow_camera }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Enumerate administrator accounts on elevation (18.9.15.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI
+    name: EnumerateAdministrators
+    data: "{{ EnumerateAdministrators }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow Telemetry (18.9.16.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection
+    name: AllowTelemetry
+    data: "{{ AllowTelemetry }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not show feedback notifications (18.9.16.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection
+    name: DoNotShowFeedbackNotifications
+    data: "{{ DoNotShowFeedbackNotifications }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Toggle user control over Insider builds (18.9.16.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds
+    name: :AllowBuildPreview
+    data: "{{ AllowBuildPreview }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off Data Execution Prevention for Explorer (18.9.30.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer
+    name: :NoDataExecutionPrevention
+    data: "{{ NoDataExecutionPrevention }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off heap termination on corruption (18.9.30.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer
+    name: :NoHeapTerminationOnCorruption
+    data: "{{ NoHeapTerminationOnCorruption }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Turn off shell protocol protected mode (18.9.30.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Policies\Explorer
+    name: :PreXPSP2ShellProtocolBehavior
+    data: "{{ PreXPSP2ShellProtocolBehavior }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Block all consumer Microsoft account user authentication (18.9.44.1)
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\MicrosoftAccount
+    name: :DisableUserAuth
+    data: "{{ DisableUserAuth }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Prevent the usage of OneDrive for file storage (18.9.52.1)
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\Windows\OneDrive
+    name: :DisableFileSyncNGSC
+    data: "{{ DisableFileSyncNGSC }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Windows Components Do not allow passwords to be saved (18.9.59.2.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: DisablePasswordSaving
+    data: "{{ windows_components_do_not_allow_passwords_to_be_saved }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Restrict Remote Desktop Services users to a single Remote Desktop Services session (18.9.59.3.2.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: fSingleSessionPerUser
+    data: "{{ fSingleSessionPerUser }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Windows Components Always prompt client for password upon connection (18.9.59.3.9.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: fPromptForPassword
+    data: "{{ windows_components_always_prompt_client_for_password_upon_connection }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Require secure RPC communication (18.9.59.3.9.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: fEncryptRPCTraffic
+    data: "{{ fEncryptRPCTraffic }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Require use of specific security layer for remote (RDP) connections (18.9.59.3.9.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: SecurityLayer
+    data: "{{ SecurityLayer }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Require user authentication for remote connections by using Network Level Authentication (18.9.59.3.9.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: UserAuthentication
+    data: "{{ nla_enable }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Windows Components Set client connection encryption level (18.9.59.3.9.5)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: MinEncryptionLevel
+    data: "{{ windows_components_set_client_connection_encryption_level }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Set time limit for disconnected sessions (18.9.59.3.10.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: MaxDisconnectionTime
+    data: "{{ MaxDisconnectionTime }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not delete temp folders upon exit (18.9.59.3.11)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: DeleteTempDirsOnExit
+    data: "{{ DeleteTempDirsOnExit }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Do not use temporary folders per session (18.9.59.3.11.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: PerSessionTempDir
+    data: "{{ PerSessionTempDir }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Allow Basic Authentication WinRM Client (18.9.97.1.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client
+    name: AllowBasic
+    data: "{{ allow_basic_authentication_winrm_client }}"
+    type: dword
+  tags:
+    - misc
+    - winrm
+    - registry
+
+- name: Allow Allow Unencrypted Traffic WinRM Client (18.9.97.1.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client
+    name: AllowUnencryptedTraffic
+    data: "{{ allow_allow_unencrypted_traffic_winrm_client }}"
+    type: dword
+  tags:
+    - misc
+    - winrm
+    - registry
+
+- name: Allow Allow Digest Authentication WinRM Client (18.9.97.1.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client
+    name: AllowDigest
+    data: "{{ allow_allow_digest_authentication_winrm_client }}"
+    type: dword
+  tags:
+    - misc
+    - winrm
+    - registry
+
+- name: Allow Basic Authentication WinRM Service (18.9.97.2.1)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service
+    name: AllowBasic
+    data: "{{ allow_basic_authentication_winrm_service }}"
+    type: dword
+  tags:
+    - misc
+    - winrm
+    - registry
+
+- name: Allow Allow Auto Config WinRM Service (18.9.97.2.2)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service
+    name: AllowAutoConfig
+    data: "{{ allow_allow_auto_config_winrm_service }}"
+    type: dword
+  tags:
+    - misc
+    - winrm
+    - registry
+
+- name: Allow Allow Unencrypted Traffic WinRM Service (18.9.97.2.3)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service
+    name: AllowUnencryptedTraffic
+    data: "{{ allow_allow_unencrypted_traffic_winrm_service }}"
+    type: dword
+  tags:
+    - misc
+    - winrm
+    - registry
+
+- name: Disable WinRM Service from storing RunAs credentials (18.9.97.2.4)
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service
+    name: :DisableRunAs
+    data: "{{ disable_winrm_service_from_storing_runas_credentials }}"
+    type: dword
+  tags:
+    - misc
+    - winrm
+    - registry
+
+- name: DNS_Suffix_Search_List
+  win_regedit:
+    path: HKLM:\System\CurrentControlSet\Services\Tcpip\Parameters
+    name: SearchList
+    data: "{{ dns_suffix_search_list[execution_type] }}"
+    type: string
+  tags:
+    - misc
+    - registry
+
+- name: ArpRetryCount
+  win_regedit:
+    path: HKLM:\System\CurrentControlSet\Services\Tcpip\Parameters
+    name: ArpRetryCount
+    data: "{{ dc_Arp_Retry_Count }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Disable Server Manager
+  win_regedit:
+    path: HKLM:\Software\Microsoft\ServerManager
+    name: DoNotOpenServerManagerAtLogon
+    data: "{{ servermanager_autostart }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Disable Windows Updates
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate
+    name: DisableWindowsUpdateAccess
+    data: "{{ DisableWindowsUpdateAccess }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Disable Windows Updates 2
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate
+    name: DoNotConnectToWindowsUpdateInternetLocations
+    data: "{{ DoNotConnectToWindowsUpdateInternetLocations }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Disable Windows Updates 3
+  win_regedit:
+    path: HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate
+    name: SetDisableUXWUAccess
+    data: "{{ SetDisableUXWUAccess }}"
+    type: dword
+  tags:
+    - misc
+    - registry
+
+- name: Network access Allow anonymous SID/Name translation (2.3.10.1)
+  win_security_policy:
+    section: 'System Access'
+    key: LSAAnonymousNameLookup
+    value: "{{ network_access_allow_anonymous_sid_name_translation }}"
+  tags:
+    - network_access

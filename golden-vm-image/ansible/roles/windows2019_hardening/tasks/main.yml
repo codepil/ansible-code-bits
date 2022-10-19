@@ -1,0 +1,46 @@
+---
+# Disabling Internet Explorer
+- include: disable_ie.yml
+  when: ansible_facts['os_installation_type'] != "Server Core"
+
+# Set firewall rules
+# tags: firewall
+- include: firewall.yml
+  notify: Disable local firewall
+
+# Set Password Policy
+# tags: password_policy
+- include: password_policies.yml
+
+# Audit Policy Subcategories
+# tags: audit_policy
+- include: audit_policies.yml
+
+# Cipher policies
+# tags: cipher_policies, registry
+- include: cipher_policies.yml
+
+# Event log policies
+# tags: eventlog
+- include: eventlog_policies.yml
+
+# misc policies
+# tags: registry, misc
+- include: misc_policies.yml
+
+# User Rights Assignment
+# tags: user_rights
+- include: user_rights_assignment.yml
+
+# NTP services
+# tags: ntp, registry
+- include: ntp.yml
+
+# NIC properties
+# tags: shell, network
+# - include: nic_properties.yml
+
+# Print available facts
+# - name: Print all available facts
+#  ansible.builtin.debug:
+#    var: ansible_facts

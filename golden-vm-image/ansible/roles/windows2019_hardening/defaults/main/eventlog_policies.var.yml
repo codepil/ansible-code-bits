@@ -1,0 +1,7 @@
+---
+## Event Log settings
+application_evt_log_size_bytes: '32MB'
+security_evt_log_size_bytes: '20MB'
+system_evt_log_size_bytes: '32MB'
+
+# setup_evt_log_size_bytes: '32MB'

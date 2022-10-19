@@ -1,0 +1,46 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/win_firewall_rule_module.html#win-firewall-rule-module
+# https://github.com/dsccommunity/NetworkingDsc/wiki/FirewallProfile
+# https://docs.ansible.com/ansible/latest/modules/win_dsc_module.html
+
+- name: Inbound firewall rule
+  win_firewall_rule:
+    name: inbound
+    action: allow
+    direction: in
+    enabled: true  # test to ensure it doesn't turn on the firewall
+    localip: any
+    localport: any
+    profiles: private,public,domain
+    remoteip: any
+    remoteport: any
+    service: any
+    state: present
+  tags:
+    - firewall
+
+- name: Outbound firewall rule
+  win_firewall_rule:
+    name: outbound
+    action: allow
+    direction: out
+    enabled: true
+    localip: any
+    localport: any
+    profiles: private,public,domain
+    remoteip: any
+    remoteport: any
+    service: any
+    state: present
+  tags:
+    - firewall
+
+- name: Configure firewall profiles
+  win_firewall:
+    profiles:
+      - Domain
+      - Public
+      - Private
+    state: disabled
+  tags:
+    - firewall

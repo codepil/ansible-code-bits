@@ -1,0 +1,110 @@
+---
+# 6.1.10 - 6.1.12 Ensure no world writable files, no unowned files, no ungrouped files, exist
+- name: Audit if any world writable or unowned or ungrouped files exist
+  shell: >
+    set -o pipefail && \
+      df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f \( -perm -0002 -o -nouser -o -nogroup \)
+  args:
+    executable: /bin/bash
+  register: audit_6_1_10_12
+  # Base image doesn't have any 'no world writable, unowned/ungrouped files', so no action needed for now.
+  # Failing with Ansible action if any files present, for review/developing a next next action, example who would be the owner if no owner..etc
+  changed_when: audit_6_1_10_12.stdout_lines != 0
+  when:
+    - audit_6_1_10_12.stdout_lines is defined and audit_6_1_10_12.stdout_lines|length > 0
+    - no_world_writable_files_exist
+    - no_unowned_files_or_directories_exist
+    - no_ungrouped_files_or_directories_exist
+
+- name: "Fail if 6.1.10 - 6.1.12 Ensure no world writable files, no unowned files, no ungrouped files, exist"
+  fail:
+    msg: "{{ audit_6_1_10_12.stdout_lines }}"
+  when:
+    - audit_6_1_10_12.stdout_lines is defined and audit_6_1_10_12.stdout_lines|length > 0
+
+- name: "Ensure password fields are not empty"
+  command: passwd -l {{ item }}
+  changed_when: false
+  failed_when: false
+  with_items: "{{ empty_password_accounts.stdout_lines }}"
+  when:
+    - empty_password_accounts.rc
+    - password_fields_are_not_empty
+
+- name: "Ensure users' home directories permissions are 750 or more restrictive"
+  shell: |
+      for dir in {{ homes_with_perms.stdout }};
+      do
+        chmod g-w,o-rwx $dir;
+      done
+  when:
+    - users_home_directories_permissions_are_750_or_more_restrictive
+    - homes_with_perms.stdout | length > 0
+
+- name: "Ensure no users have .netrc files"
+  file:
+    state: absent
+    dest: "~{{ item }}/.netrc"
+  with_items: "{{ users.stdout_lines }}"
+  when:
+    - no_users_have__netrc_files
+
+- name: "Ensure no users have .forward files"
+  file:
+    state: absent
+    dest: "~{{ item }}/.forward"
+  with_items: "{{ users.stdout_lines }}"
+  when:
+    - no_users_have__forward_files
+
+- name: "Ensure no users have .rhosts files"
+  file:
+    state: absent
+    dest: "~{{ item }}/.rhosts"
+  with_items: "{{ users.stdout_lines }}"
+  when:
+    - no_users_have__rhosts_files
+
+- name: "Ensure root is the only UID 0 account"
+  command: passwd -l {{ item }}
+  changed_when: false
+  failed_when: false
+  with_items: "{{ uid_zero_accounts_except_root.stdout_lines }}"
+  when:
+    - uid_zero_accounts_except_root.rc
+    - root_is_the_only_uid_0_account
+
+- name: "Ensure root PATH Integrity"
+  block:
+    - name: "Ensure root PATH Integrity (unimplemented)"
+      command: /bin/true
+      changed_when: false
+
+    - name: "Ensure root PATH Integrity (collect paths)"
+      shell: |
+        set -o pipefail;
+        sudopath=($(grep secure_path /etc/sudoers | cut -f2 -d= |cut -f2 -d\"))
+        IFS=:
+        for i in ${sudopath[*]}
+        do
+          if [ -d "$i" ]
+            then newsudopath+=($i)
+          fi
+          done
+        echo "${newsudopath[*]}"
+      args:
+        executable: /bin/bash
+      register: fixsudo
+      changed_when: false
+      check_mode: false
+
+    - name: "Ensure root PATH Integrity (fix paths)"
+      lineinfile:
+        dest: /etc/sudoers
+        regexp: "(.*secure_path=).*"
+        line: '\1"{{ fixsudo.stdout_lines[0] }}"'
+        backrefs: true
+      when:
+        - fixsudo.stdout_lines[0]
+  when:
+    - root_pah_integrity

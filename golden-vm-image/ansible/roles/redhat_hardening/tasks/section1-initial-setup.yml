@@ -1,0 +1,409 @@
+---
+- name: "Disable unused filesystems."
+  template:
+    src: "etc/CIS-disable-fs-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.conf"
+    dest: /etc/modprobe.d/CIS.conf
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - disable_unused_filesystems
+
+- name: "Copy tmp.mount file."
+  copy:
+    src: "{{ tmp_mount_file[ansible_os_family] }}"
+    dest: /etc/systemd/system/tmp.mount
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+    remote_src: true
+  when:
+    - tmp_is_configured
+
+- name: "Enable and start/restart tmp.mount"
+  systemd:
+    name: tmp.mount
+    daemon_reload: true
+    enabled: true
+    masked: false
+    state: started
+  when:
+    - tmp_is_configured
+
+- name: "Ensure nodev option set on /tmp partition\n
+        Ensure nosuid option set on /tmp partition"
+  ini_file:
+    path: "{{ item }}"
+    section: Mount
+    option: Options
+    value: "{{ tmp_mount_options[ansible_os_family] }}"
+    no_extra_spaces: true
+    mode: "644"
+  with_items:
+    - "{{ tmp_mount_file[ansible_os_family] }}"
+    - /etc/systemd/system/tmp.mount
+  when:
+    - nodev_option_set_on_tmp_partition
+    - nosuid_option_set_on_tmp_partition
+    - noexec_option_set_on_tmp_partition
+
+- name: "Ensure /dev/shm is configured\n
+        Ensure nodev option set on /dev/shm partition\n
+        Ensure nosuid option set on /dev/shm partition\n
+        Ensure noexec option set on /dev/shm partition"
+  mount:
+    name: /dev/shm
+    src: tmpfs
+    state: mounted
+    fstype: tmpfs
+    opts: "defaults,nodev,nosuid,noexec"
+  when:
+    - nodev_option_set_on_dev_shm_partition
+    - nosuid_option_set_on_dev_shm_partition
+    - noexec_option_set_on_dev_shm_partition
+
+- name: "Ensure separate partition exists for /var"
+  shell: "set -o pipefail;
+    mount | grep 'on /var '"
+  register: var_mounted
+  changed_when: false
+  failed_when: false
+  args:
+    warn: false
+  when:
+    - separate_partition_exists_for_var
+
+- name: "Ensure separate partition exists for /var/tmp"
+  shell: "set -o pipefail;
+    mount | grep 'on /var/tmp '"
+  register: var_tmp_mounted
+  changed_when: false
+  failed_when: false
+  args:
+    warn: false
+  when:
+    - separate_partition_exists_for_var_tmp
+
+- name: "Ensure nodev option set on /var/tmp partition\n
+        Ensure nosuid option set on /var/tmp partition\n
+        Ensure noexec option set on /var/tmp partition"
+  mount:
+    name: /var/tmp
+    src: "{{ var_vartmp['source'] }}"
+    state: mounted
+    fstype: "{{ var_vartmp['fstype'] }}"
+    opts: "{{ var_vartmp['opts'] }}"
+  when:
+    - var_vartmp['enabled'] == 'yes'
+    - var_tmp_partition_includes_the_nodev_option
+    - var_tmp_partition_includes_the_nosuid_option
+    - var_tmp_partition_includes_the_noexec_option
+
+- name: "Ensure separate partition exists for /var/log"
+  shell: "set -o pipefail;
+    mount | grep 'on /var/log '"
+  register: var_log_mounted
+  changed_when: false
+  failed_when: false
+  args:
+    warn: false
+  when:
+    - separate_partition_exists_for_var_log
+
+- name: "Ensure separate partition exists for /var/log/audit"
+  shell: "set -o pipefail;
+    mount | grep 'on /var/log/audit '"
+  register: var_log_audit_mounted
+  changed_when: false
+  failed_when: false
+  args:
+    warn: false
+  when:
+    - separate_partition_exists_for_var_log_audit
+
+- name: "Ensure separate partition exists for /home"
+  shell: "set -o pipefail;
+     mount | grep 'on /home '"
+  register: home_mounted
+  changed_when: false
+  failed_when: false
+  args:
+    warn: false
+  when:
+    - separate_partition_exists_for_home
+
+- name: "Ensure nodev option set on /home partition"
+  mount:
+    name: "/home"
+    src: "{{ item.device }}"
+    state: mounted
+    fstype: "{{ item.fstype }}"
+    opts: "nodev"
+  when:
+    - nodev_option_set_on_home_partition
+    - item.mount == "/home"
+  with_items:
+    - "{{ ansible_mounts }}"
+
+- name: "Ensure sticky bit is set on all world-writable directories"
+  shell: |
+      set -o pipefail;
+      df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d -perm -0002 2>/dev/null | xargs chmod a+t
+  args:
+    executable: /bin/bash
+  changed_when: false
+  failed_when: false
+  when:
+    - sticky_bit_is_set_on_all_world_writable_directories
+
+- name: "Disable Automounting"
+  service:
+    name: autofs
+    enabled: false
+  when:
+    - autofs_service_status.stdout == "loaded"
+    - disable_automounting
+
+- name: "The Red Hat Network Service rhnsd service must not be running, unless using RHN or an RHN Satellite."
+  service:
+    name: rhnsd
+    state: stopped
+    enabled: true
+  failed_when: false
+  when:
+    - disable_the_rhnsd_daemon
+
+- name: "Ensure sudo is installed"
+  package:
+    name:
+      - sudo
+    state: present
+  when:
+    - sudo_is_installed
+
+- name: "Ensure sudo commands use pty"
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^Defaults use_pty'
+    line: 'Defaults use_pty'
+    validate: 'visudo -cf %s'
+  when:
+    - sudo_commands_use_pty
+
+- name: "Configure sudo logging"
+  block:
+    - name: "Modify sudoers"
+      lineinfile:
+        path: '/etc/sudoers'
+        line: 'Defaults  syslog=local1'
+        validate: 'visudo -cf %s'
+        state: present
+    - name: " Modify rsyslog"
+      lineinfile:
+        path: '/etc/rsyslog.d/50-default.conf'
+        line: 'local1.*  /var/log/sudo.log'
+        state: present
+        create: true
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+  when:
+    - sudo_log_file_exists
+
+- name: "Ensure authentication required for single user mode"
+  block:
+    - name: "Ensure authentication required for single user mode | Emergency service"
+      lineinfile:
+        dest: /usr/lib/systemd/system/emergency.service
+        regexp: '/sbin/sulogin'
+        line: 'ExecStart=-/usr/lib/systemd/systemd-sulogin-shell emergency'
+
+    - name: "Ensure authentication required for single user mode | Rescue service"
+      lineinfile:
+        dest: /usr/lib/systemd/system/rescue.service
+        regexp: '/sbin/sulogin'
+        line: 'ExecStart=-/usr/lib/systemd/systemd-sulogin-shell rescue'
+  when:
+    - authentication_required_for_single_user_mode
+
+- name: "Ensure address space layout randomization (ASLR) is enabled"
+  sysctl:
+    name: kernel.randomize_va_space
+    value: "2"
+    state: present
+    reload: true
+    sysctl_set: true
+    ignoreerrors: true
+  when:
+    - address_space_layout_randomization_aslr_is_enabled
+
+- name: "Ensure SELinux is installed"
+  package:
+    name: libselinux
+    state: present
+  when:
+    - selinux_is_installed
+
+- name: "Ensure SELinux is not disabled in bootloader configuration"
+  replace:
+    dest: /etc/default/grub
+    regexp: '(selinux|enforcing)\s*=\s*0\s*'
+    replace: ''
+  register: selinux_grub_patch
+  ignore_errors: true
+  notify: grub2cfg
+  when:
+    - selinux_is_not_disabled_in_bootloader_configuration
+
+- name: "Ensure SELinux policy is configured"
+  selinux:
+    conf: /etc/selinux/config
+    policy: "{{ rhelcis_selinux_pol }}"
+    state: enforcing
+  when:
+    - selinux_is_installed
+    - selinux_policy_is_configured
+
+- name: "Ensure the SELinux state is enforcing"
+  selinux:
+    conf: /etc/selinux/config
+    policy: "{{ rhelcis_selinux_pol }}"
+    state: enforcing
+  when:
+    - selinux_is_installed
+    - selinux_state_is_enforcing
+
+- name: "Ensure no unconfined daemons exist"
+  block:
+    - name: "Ensure no unconfined daemons exist | Find the unconfined daemons"
+      shell: ps -eZ | grep unconfined_service_t | egrep -vw "tr|ps|egrep|bash|awk" | tr ':' ' ' | awk '{ print $NF }'
+      register: rhelcis_unconf_daemons
+      failed_when: false
+      changed_when: false
+
+    - name: "Ensure no unconfined daemons exist | Message on no unconfined daemones"
+      debug:
+        msg: "Good News! There are no unconfined daemons found on your system"
+      when: rhelcis_unconf_daemons.stdout | length == 0
+
+    - name: "Ensure no unconfined daemons exist | Message on unconfined daemones"
+      debug:
+        msg: "Warning! You have unconfined daemons: {{ rhelcis_unconf_daemons.stdout_lines }}"
+      when: rhelcis_unconf_daemons.stdout | length > 0
+  when:
+    - no_unconfined_services_exist
+
+- name: "Ensure SETroubleshoot is not installed"
+  package:
+    name: setroubleshoot
+    state: absent
+  when:
+    - setroubleshoot_is_not_installed
+    - "'setroubleshoot' in ansible_facts.packages"
+
+- name: "Ensure the MCS Translation Service (mcstrans) is not installed"
+  package:
+    name: mcstrans
+    state: absent
+  when:
+    - mcs_translation_service_mcstrans_is_not_installed
+
+- name: "Ensure core dumps are restricted"
+  sysctl:
+    name: fs.suid_dumpable
+    value: "0"
+    state: present
+    reload: true
+    sysctl_set: true
+    ignoreerrors: true
+  when:
+    - core_dumps_are_restricted
+
+- name: "Ensure systemd-coredump is configured"
+  template:
+    src: coredump.conf.j2
+    dest: /etc/systemd/coredump.conf
+    mode: 0644
+    owner: root
+    group: root
+  when:
+    - core_dumps_are_restricted
+
+- name: "Ensure hard core 0 is set"
+  lineinfile:
+    dest: /etc/security/limits.conf
+    line: '*                hard    core            0'
+    regexp: '(^#)?\*\s+hard\s+core\s+[0-9]+'
+    state: present
+    create: true
+    insertbefore: "# End of file"
+    mode: "644"
+  when:
+    - core_dumps_are_restricted
+
+- name: "Ensure message of the day is configured properly."
+  block:
+    - name: "Ensure message of the day does not exist."
+      file:
+        path: /etc/motd
+        state: absent
+    - name: "disable printing previous login information on login."
+      lineinfile:
+        state: present
+        dest: /etc/ssh/sshd_config
+        regexp: '^PrintLastLog\ yes'
+        line: 'PrintLastLog no'
+  when:
+    - message_of_the_day_is_configured_properly
+
+- name: "Ensure local login warning banner is configured properly"
+  template:
+    src: etc/issue.j2
+    dest: /etc/issue
+    mode: "644"
+  when:
+    - local_login_warning_banner_is_configured_properly
+
+- name: "Ensure remote login warning banner is configured properly"
+  template:
+    src: etc/issue.net.j2
+    dest: /etc/issue.net
+    mode: "644"
+  when:
+    - remote_login_warning_banner_is_configured_properly
+
+- name: "Ensure proper permissions are set on files"
+  file:
+    path: "{{ item.name }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ var_file_permissions }}"
+  when:
+    - permissions_on_files
+
+- name: "Ensure GNOME Display Manager is removed"
+  package:
+    name: gdm3
+    state: absent
+  when:
+    - gdm_login_banner_is_configured
+
+- name: "Ensure system-wide crypto policy is not legacy"
+  block:
+    - name: Configure System Cryptography Policy
+      lineinfile:
+        path: /etc/crypto-policies/config
+        regexp: ^(?!#)(\S+)$
+        line: '{{ var_system_crypto_policy }}'
+        create: true
+        mode: u-x,go-xw
+        owner: root
+    - name: Verify that Crypto Policy is Set (runtime)
+      command: /usr/bin/update-crypto-policies --set {{ var_system_crypto_policy }}
+  when:
+    - system_wide_crypto_policy_is_not_legacy
+    - 'ansible_distribution_major_version == "8"'

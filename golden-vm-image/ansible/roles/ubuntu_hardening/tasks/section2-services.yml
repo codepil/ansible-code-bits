@@ -1,0 +1,204 @@
+---
+# - name: Populate the package facts
+#   package_facts:
+# - name: Populate the service facts
+#   service_facts:
+
+- name: "Ensure time synchronization is in use"
+  block:
+      - name: "Ensure time synchronization is in use - service install"
+        apt:
+            name: "{{ var_time_synchronization }}"
+            state: present
+            install_recommends: false
+
+      - name: "Ensure time synchronization is in use - service start"
+        service:
+            name: "{{ var_time_synchronization }}"
+            state: started
+            enabled: true
+
+      - name: "Ensure time synchronization is in use - service stop ntp"
+        service:
+            name: "{{ ntp_service[ansible_os_family] }}"
+            state: stopped
+            enabled: false
+        when:
+            - var_time_synchronization == "chrony"
+            - ntpd_service_status.stdout == "loaded"
+
+      - name: "Ensure time synchronization is in use - service stop chrony"
+        service:
+            name: chronyd
+            state: stopped
+            enabled: false
+        failed_when: false
+        when:
+            - var_time_synchronization == "ntp"
+            - chronyd_service_status.stdout == "loaded"
+
+      - name: "Ensure time synchronization is in use - mask systemd-timesyncd"
+        systemd:
+            name: systemd-timesyncd
+            enabled: true
+            masked: true
+        when:
+            - var_time_synchronization == "ntp"
+            - chronyd_service_status.stdout == "loaded"
+  when:
+      - time_synchronization_is_in_use
+
+- name: "Ensure chrony is configured"
+  block:
+      - name: "Ensure chrony is configured | create chrony.conf"
+        template:
+            src: chrony.conf.j2
+            dest: /etc/chrony/chrony.conf
+            owner: root
+            group: root
+            mode: 0644
+  when:
+      - var_time_synchronization == "chrony"
+      - chrony_is_configured
+
+- name: "Ensure ntp is configured"
+  block:
+      - name: "Ensure ntp is configured | modify /etc/ntp.conf"
+        template:
+            src: ntp.conf.j2
+            dest: /etc/ntp.conf
+            owner: root
+            group: root
+            mode: 0644
+
+      - name: "Ensure ntp is configured | modify /etc/init.d/ntp"
+        lineinfile:
+            dest: /etc/init.d/ntp
+            regexp: "^RUNASUSER"
+            line: "RUNASUSER=ntp"
+  when:
+      - var_time_synchronization == "ntp"
+      - ntp_is_configured
+
+- name: "Ensure X Window System xorg is not installed"
+  apt:
+      name: "{{ item.package_name }}"
+      state: absent
+  with_items:
+      - "{{ x11_package_prefix }}"
+  when:
+      - x11_package_prefix is defined
+      - item.package_name is defined
+      - window_system_is_not_installed
+      - item.package_name in ansible_facts.packages
+
+- name: "Ensure required services are not enabled if present"
+  service:
+      name: "{{ item.service_name }}"
+      enabled: false
+      state: stopped
+  with_items:
+      - "{{ disable_services }}"
+  when:
+      - disable_services is defined
+      - item.package_name is defined
+      - item.package_name in ansible_facts.packages
+      - disable_remove_unwanted_services
+
+- name: "Ensure required services are removed if present"
+  apt:
+      name: "{{ item.package_name }}"
+      state: absent
+  with_items:
+      - "{{ disable_services }}"
+  when:
+      - disable_services is defined
+      - item.package_name is defined
+      - item.package_name in ansible_facts.packages
+      - disable_remove_unwanted_services
+
+- name: "Ensure mail transfer agent is configured for local-only mode"
+  lineinfile:
+      dest: /etc/postfix/main.cf
+      regexp: "^(#)?inet_interfaces"
+      line: "inet_interfaces = localhost"
+  when:
+      - postfix_installed.rc == 0
+      - mail_transfer_agent_is_configured_for_local_only_mode
+
+- name: "Ensure rsync service is not enabled "
+  service:
+      name: rsync
+      state: stopped
+      enabled: false
+  when:
+      - rsyncd_service_status.stdout == "loaded"
+      - rsync_service_is_not_installed
+
+- name: "Ensure NIS Server is not enabled"
+  service:
+      name: nis
+      state: stopped
+      enabled: false
+  when:
+      - ypserv_service_status.stdout == "loaded"
+      - nis_server_is_not_installed
+
+- name: "Ensure NIS Client is not installed"
+  apt:
+      name: yp-tools
+      state: absent
+  when:
+      - nis_client_is_not_installed
+
+- name: "Ensure rsh client is not installed"
+  apt:
+      name: rsh
+      state: absent
+  when:
+      - rsh_client_is_not_installed
+
+- name: "Ensure talk client is not installed"
+  apt:
+      name: talk
+      state: absent
+  when:
+      - talk_client_is_not_installed
+
+- name: "Ensure telnet client is not installed"
+  apt:
+      name: telnet
+      state: absent
+  when:
+      - telnet_client_is_not_installed
+
+- name: "Ensure LDAP client is not installed"
+  apt:
+      name: ldap-utils
+      state: absent
+  when:
+      - ldap_client_is_not_installed
+- name: "Ensure RPC is not installed"
+  apt:
+      name: rpcbind
+      state: absent
+  when:
+      - rpc_is_not_installed
+
+- name: "Ensure nonessential services are removed or masked"
+  changed_when: false
+  debug:
+      msg: >
+          Run the following command:
+          # lsof -i -P -n | grep -v "(ESTABLISHED)"
+          Review the output to ensure that all services listed are
+          required on the system. If a listed service is not required,
+          remove the package containing the service. If the package containing
+          a non-essential service is required, stop and mask the non-essential service.
+          Run the following command to remove the package containing the
+          service:
+          # apt purge <package_name>
+          Run the following command to stop and mask the service:
+          # systemctl --now mask <service_name>
+  when:
+      - nonessential_services_are_removed_or_masked

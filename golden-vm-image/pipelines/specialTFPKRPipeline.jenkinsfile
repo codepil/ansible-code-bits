@@ -1,0 +1,51 @@
+@Library('lz-jenkins-shared-lib@master') _
+
+def unitCode = 'ssvc'
+
+properties([
+    parameters([
+        // choice(
+        //     name: 'SDLC_CATEGORY',
+        //     choices: [
+        //         'devqa',
+        //         'noncde',
+        //         'cde',
+        //         'ops'
+        //     ],
+        //     description: 'Maps to the target sdlc boundary of this manifest.'
+        // ),
+        string(
+            name: 'TARGET_MANIFEST',
+            defaultValue: 'terraform',
+            description: '(Required) The target landing zone instance to be executed.'
+        ),
+        string(
+            name: 'PROJECT_BLUEPRINT_REF',
+            defaultValue: 'master',
+            description: '(Required) The git ref (branch, tag, commit) to be executed.'
+        ),
+        booleanParam(
+            name: 'AUTO_APPROVE',
+            defaultValue: false,
+            description: 'If true, pipeline will not halt for user approval after terraform plan'
+        )
+    ])
+])
+
+def sdlc = "cde"
+def target = params.TARGET_MANIFEST
+def tfModuleRef = params.PROJECT_BLUEPRINT_REF
+def autoApprove = params.AUTO_APPROVE
+
+defaultTerraformPipeline {
+    TF_MODULE_REPO      = 'https://github.com/codepil/ansible-code-bits/golden-vm-image-configuration.git'
+    TF_MODULE_PATH      = './terraform'
+    TF_MODULE_REF       = tfModuleRef
+    TF_MANIFEST_PATH    = "./terraform/manifests/${sdlc}/${target}.tfvars"
+    TF_STATE_BUCKET     = "bkt-gcp-lz-bu-${unitCode}-${sdlc}-tf"
+    TF_STATE_PREFIX     = "projects/${sdlc}/${target}-pkr-tf"
+    AUTO_APPROVE        = autoApprove
+    JENKINS_CLOUD       = 'kubernetes'
+    JENKINS_NAMESPACE   = "lz-bu-${unitCode}"
+    JENKINS_SVC_ACCT    = "lz-bu-${unitCode}-${sdlc}-master"
+}

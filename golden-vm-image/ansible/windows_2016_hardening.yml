@@ -1,0 +1,40 @@
+---
+- hosts: all
+  vars:
+    execution_type: 'gcp_image'
+  roles:
+    - role: windows2016_hardening
+      become: true
+      become_method: runas
+      become_user: System
+
+    - role: google-cloud-ops-agents-ansible
+      become: true
+      become_method: runas
+      become_user: System
+      when:
+        execution_type == 'gcp_image'
+      vars:
+        agent_type: 'logging'
+        main_config_file: ./files/windows_fluent.conf
+        #additional_config_dir: ./files/windows_evt.conf
+
+    - role: google-cloud-ops-agents-ansible
+      become: true
+      become_method: runas
+      become_user: System
+      when:
+        execution_type == 'gcp_image'
+      vars:
+        agent_type: 'monitoring'
+
+    # Google Ops Agent is not compatible on systems where the Legacy Stackdriver Agent is installed.
+    # - role: google-cloud-ops-agents-ansible
+    #   become: true
+    #   become_method: runas
+    #   become_user: System
+    #   when:
+    #     execution_type == 'gcp_image'
+    #   vars:
+    #     agent_type: 'ops-agent'
+    #     main_config_file: ''

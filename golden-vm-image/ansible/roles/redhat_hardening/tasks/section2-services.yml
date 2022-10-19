@@ -1,0 +1,137 @@
+---
+- name: "Ensure xinetd is not installed"
+  package:
+      name: xinetd
+      state: absent
+  when:
+      - xinetd_is_not_installed
+
+- name: "Ensure time synchronization is in use"
+  block:
+      - name: "Ensure time synchronization is in use - service install"
+        package:
+            name: "{{ var_time_synchronization }}"
+            state: present
+
+      - name: "Ensure time synchronization is in use - service start"
+        service:
+            name: "{{ chrony_service[ansible_os_family] }}"
+            state: started
+            enabled: true
+
+      - name: "Ensure time synchronization is in use - service stop ntp"
+        service:
+            name: "{{ ntp_service[ansible_os_family] }}"
+            state: stopped
+            enabled: false
+        when:
+            - var_time_synchronization == "chrony"
+            - ntpd_service_status.stdout == "loaded"
+  when:
+      - time_synchronization_is_in_use
+
+- name: Configure /etc/chrony.conf
+  lineinfile:
+      dest: '/etc/chrony.conf'
+      regexp: "{{ item.regex }}"
+      line: "{{ item.value }}"
+      state: present
+      owner: root
+      group: root
+      mode: 0644
+  with_items:
+      - "{{ base_chrony_content }}"
+      - "{{ additional_chrony_content }}"
+  when:
+      - item.regex is defined
+      - var_time_synchronization == "chrony"
+      - chrony_is_configured
+
+- name: "Ensure X Window System is not installed Redhat 7"
+  yum:
+      name:
+          - "@X Window System"
+          - "@MATE Desktop"
+      state: absent
+  when:
+      - x_window_system_is_not_installed
+      - 'ansible_distribution_major_version == "7"'
+
+- name: "Ensure X Window System is not installed Redhat 8"
+  yum:
+      name:
+          - "@Server with GUI"
+      state: absent
+  when:
+      - x_window_system_is_not_installed
+      - 'ansible_distribution_major_version == "8"'
+
+- name: Ensure required services are not enabled if present
+  service:
+      name: "{{ item.service_name }}"
+      enabled: false
+      state: stopped
+  with_items:
+      - "{{ disable_services }}"
+  when:
+      - disable_services is defined
+      - item.package_name is defined
+      - item.package_name in ansible_facts.packages
+      - disable_remove_unwanted_services
+
+- name: "Ensure required services are removed if present"
+  package:
+      name: "{{ item.package_name }}"
+      state: absent
+  with_items:
+      - "{{ disable_services }}"
+  when:
+      - disable_services is defined
+      - item.package_name is defined
+      - item.package_name in ansible_facts.packages
+      - disable_remove_unwanted_services
+
+- name: "Ensure mail transfer agent is configured for local-only mode"
+  lineinfile:
+      dest: /etc/postfix/main.cf
+      regexp: "^(#)?inet_interfaces"
+      line: "inet_interfaces = loopback-only"
+  when:
+      - postfix_installed.rc == 0
+      - mail_transfer_agent_is_configured_for_local_only_mode
+
+- name: "Ensure NIS Server is not enabled"
+  service:
+      name: nis
+      state: stopped
+      enabled: false
+  when:
+      - ypserv_service_status.stdout == "loaded"
+
+- name: "Ensure NIS Client is not installed"
+  package:
+      name: yp-tools
+      state: absent
+  when:
+      - nis_client_is_not_installed
+
+- name: "Ensure telnet client is not installed"
+  package:
+      name: telnet
+      state: absent
+  when:
+      - telnet_client_is_not_installed
+
+- name: "Ensure LDAP client is not installed"
+  package:
+      name: ldap-utils
+      state: absent
+  when:
+      - ldap_client_is_not_installed
+
+- name: "Ensure RPC is not installed"
+  package:
+      name: rpcbind
+      state: absent
+  when:
+      - rpc_is_not_enabled

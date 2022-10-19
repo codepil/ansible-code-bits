@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  role_name: "redhat_hardening"
+  namespace: golden_vm_image_configuration
+  description: "Ansible role to apply Redhat hardening."
+  min_ansible_version: 2.11.4
+  license: mit
+
+  platforms:
+    - name: Redhat
+
+  galaxy_tags:
+    - system
+    - security
+    - hardening
+
+dependencies: []

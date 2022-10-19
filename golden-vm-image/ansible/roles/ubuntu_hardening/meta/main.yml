@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  role_name: "ubuntu_hardening"
+  namespace: golden_vm_image_configuration
+  author: "Ramesh Ravindranathan"
+  description: "Ansible role to apply Ubuntu hardening."
+  company: "your company"
+  min_ansible_version: 2.11.4
+  license: mit
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - bionic
+
+  galaxy_tags:
+    - system
+    - security
+    - hardening
+
+dependencies: []

@@ -1,0 +1,18 @@
+---
+- name: Disable Internet Explorer
+  ansible.windows.win_powershell:
+    script: |
+      # We know that to enable or disable Internet Explorer REQUIRES a reboot for any change to take effect;
+      # so we are assuming 3010 exit code means that a change has occurred and if we get an exit code of 0 then no changes were required.
+      # All other exit codes are marked as failure to debug further.
+      dism.exe /online /{{ DisableIE[execution_type] }} /FeatureName:Internet-Explorer-Optional-amd64 /NoRestart /Quiet
+      if ($lastExitCode -eq 3010) {
+        $Ansible.Changed = $true
+      } elseif ($lastExitCode -eq 0) {
+        $Ansible.Changed = $false
+      } else {
+        $Ansible.Result = "Unexpected exit code: $lastExitCode"
+        $Ansible.Failed = $true
+      }
+  notify:
+    - Reboot Windows Machine

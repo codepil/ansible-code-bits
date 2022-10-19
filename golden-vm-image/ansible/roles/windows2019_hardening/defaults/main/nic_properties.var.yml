@@ -1,0 +1,5 @@
+---
+# Windows NIC optimization properties
+# Tags: shell, network
+win_hardening_nic_smallrxbuffers: 4096
+win_hardening_nic_rxring1size: 2048
